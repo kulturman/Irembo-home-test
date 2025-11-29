@@ -12,6 +12,14 @@ services:
     volumes:
       - irembo-data:/var/lib/postgresql/data
 
+  queue:
+    image: rabbitmq:latest
+    container_name: irembo-queue
+    restart: unless-stopped
+    ports:
+      - "5670:5672"
+      - "15670:15672"
+
 volumes:
   irembo-data:
     driver: local

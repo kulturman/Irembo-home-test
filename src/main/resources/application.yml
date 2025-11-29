@@ -6,3 +6,9 @@ spring:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5420/irembo}
     username: ${DATABASE_USERNAME:irembo}
     password: ${DATABASE_PASSWORD:irembo}
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5670}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
