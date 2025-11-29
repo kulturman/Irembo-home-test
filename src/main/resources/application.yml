@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: IremboTest
+
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5420/irembo}
+    username: ${DATABASE_USERNAME:irembo}
+    password: ${DATABASE_PASSWORD:irembo}
