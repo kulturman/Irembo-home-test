@@ -31,6 +31,7 @@ public class TemplateServiceTest {
         assertEquals(1, templateRepository.getSavedTemplates().size());
         Template savedTemplate = templateRepository.getSavedTemplates().getFirst();
         assertEquals(tenantId, savedTemplate.getTenantId());
+        assertNotNull(savedTemplate.getId());
         assertEquals(createTemplateRequest.getName(), savedTemplate.getName());
         assertEquals(createTemplateRequest.getContent(), savedTemplate.getContent());
     }
@@ -43,7 +44,9 @@ public class TemplateServiceTest {
         var createTemplateRequest = CreateTemplateRequest
             .builder().name("name").content("Hello guys my name is {{name}}, {{lastname}}").build();
         var template = templateService.createTemplate(createTemplateRequest);
+
         assertNotNull(template.getVariables());
+        assertEquals("[\"name\", \"lastname\"]", template.getVariables());
     }
 
 }

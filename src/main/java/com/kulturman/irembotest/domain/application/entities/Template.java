@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -17,8 +16,5 @@ public class Template {
     private UUID id;
     private String content;
     private String name;
-
-    public @Nullable Object getVariables() {
-        return null;
-    }
+    private String variables;
 }
