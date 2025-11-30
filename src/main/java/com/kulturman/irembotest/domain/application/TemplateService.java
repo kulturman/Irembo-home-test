@@ -1,6 +1,7 @@
 package com.kulturman.irembotest.domain.application;
 
 import com.kulturman.irembotest.domain.application.entities.Template;
+import com.kulturman.irembotest.domain.exceptions.TemplateNotFoundException;
 import com.kulturman.irembotest.domain.ports.TenancyProvider;
 import com.kulturman.irembotest.domain.ports.TemplateRepository;
 import lombok.AllArgsConstructor;
@@ -50,7 +51,8 @@ public class TemplateService {
 
     public void updateTemplate(UUID templateToUpdateId, UpdateTemplateRequest updateTemplateRequest) {
         var tenantId = tenancyProvider.getCurrentTenantId();
-        var template = templateRepository.findByIdAndTenantId(templateToUpdateId, tenantId).orElseThrow();
+        var template = templateRepository.findByIdAndTenantId(templateToUpdateId, tenantId)
+            .orElseThrow(() -> new TemplateNotFoundException("Template not found"));
 
         template.setContent(updateTemplateRequest.getContent());
         template.setName(updateTemplateRequest.getName());

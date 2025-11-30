@@ -1,6 +1,7 @@
 package com.kulturman.irembotest.domain.application;
 
 import com.kulturman.irembotest.domain.application.entities.Template;
+import com.kulturman.irembotest.domain.exceptions.TemplateNotFoundException;
 import com.kulturman.irembotest.domain.ports.TenancyProvider;
 import com.kulturman.irembotest.infrastructure.persistence.InMemoryTemplateRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,10 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.util.Collections;
 import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -21,19 +22,19 @@ public class TemplateServiceTest {
 
     InMemoryTemplateRepository templateRepository;
     TemplateService templateService;
+    UUID tenantId = UUID.randomUUID();
 
     @BeforeEach
     void setUp() {
         templateRepository = new InMemoryTemplateRepository();
         templateService = new TemplateService(tenancyProvider, templateRepository);
+        when(tenancyProvider.getCurrentTenantId()).thenReturn(tenantId);
     }
 
     @Test
     void shouldCreateTemplateWithCurrentTenantId() {
         var createTemplateRequest = CreateTemplateRequest
             .builder().name("name").content("This is my first template ever").build();
-        UUID tenantId = UUID.randomUUID();
-        when(tenancyProvider.getCurrentTenantId()).thenReturn(tenantId);
 
         templateService.createTemplate(createTemplateRequest);
 
@@ -58,8 +59,6 @@ public class TemplateServiceTest {
     @Test
     void shouldUpdateVariablesOnUpdate() {
         var templateToUpdateId = UUID.randomUUID();
-        UUID tenantId = UUID.randomUUID();
-        when(tenancyProvider.getCurrentTenantId()).thenReturn(tenantId);
 
         templateRepository.addTemplate(
             Template.builder().id(templateToUpdateId).tenantId(tenantId).name("name").content("Hello guys my name is {{name}}").variables("[\"name\"]").build()
@@ -72,6 +71,32 @@ public class TemplateServiceTest {
         var updatedTemplate = templateRepository.getSavedTemplates().getFirst();
 
         assertEquals("[\"name\", \"age\"]", updatedTemplate.getVariables());
+    }
+
+    @Test
+    void shouldFailIfTemplateDoesNotBelongToCurrentTenant() {
+        var templateToUpdateId = UUID.randomUUID();
+        var differentTenantId = UUID.randomUUID();
+
+        templateRepository.addTemplate(
+            Template.builder()
+                .id(templateToUpdateId)
+                .tenantId(tenantId)
+                .name("name")
+                .content("Hello {{name}}")
+                .variables("[\"name\"]")
+                .build()
+        );
+
+        // Try to update with a different tenant ID
+        when(tenancyProvider.getCurrentTenantId()).thenReturn(differentTenantId);
+
+        UpdateTemplateRequest updateRequest = UpdateTemplateRequest.builder()
+            .name("new name")
+            .content("Updated content")
+            .build();
+
+        assertThrows(TemplateNotFoundException.class, () -> templateService.updateTemplate(templateToUpdateId, updateRequest));
     }
 
 }
