@@ -30,7 +30,7 @@ public class InMemoryTemplateRepository implements TemplateRepository {
         return savedTemplates.stream().filter(t -> t.getId().equals(templateId) && t.getTenantId().equals(tenantId)).findFirst();
     }
 
-    void addTemplate(Template template) {
+    public void addTemplate(Template template) {
         savedTemplates.add(template);
     }
 }

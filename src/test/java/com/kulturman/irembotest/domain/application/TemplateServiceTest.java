@@ -3,6 +3,7 @@ package com.kulturman.irembotest.domain.application;
 import com.kulturman.irembotest.domain.application.entities.Template;
 import com.kulturman.irembotest.domain.ports.TenancyProvider;
 import com.kulturman.irembotest.infrastructure.persistence.InMemoryTemplateRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -18,10 +19,17 @@ public class TemplateServiceTest {
     @Mock
     TenancyProvider tenancyProvider;
 
+    InMemoryTemplateRepository templateRepository;
+    TemplateService templateService;
+
+    @BeforeEach
+    void setUp() {
+        templateRepository = new InMemoryTemplateRepository();
+        templateService = new TemplateService(tenancyProvider, templateRepository);
+    }
+
     @Test
     void shouldCreateTemplateWithCurrentTenantId() {
-        InMemoryTemplateRepository templateRepository = new InMemoryTemplateRepository();
-        var templateService = new TemplateService(tenancyProvider, templateRepository);
         var createTemplateRequest = CreateTemplateRequest
             .builder().name("name").content("This is my first template ever").build();
         UUID tenantId = UUID.randomUUID();
@@ -39,9 +47,6 @@ public class TemplateServiceTest {
 
     @Test
     void shouldExtractVariablesFromTemplate() {
-        InMemoryTemplateRepository templateRepository = new InMemoryTemplateRepository();
-        var templateService = new TemplateService(tenancyProvider, templateRepository);
-
         var createTemplateRequest = CreateTemplateRequest
             .builder().name("name").content("Hello guys my name is {{name}}, {{lastname}}").build();
         var template = templateService.createTemplate(createTemplateRequest);
@@ -56,11 +61,10 @@ public class TemplateServiceTest {
         UUID tenantId = UUID.randomUUID();
         when(tenancyProvider.getCurrentTenantId()).thenReturn(tenantId);
 
-        InMemoryTemplateRepository templateRepository = new InMemoryTemplateRepository(
-            Collections.singletonList(Template.builder().id(templateToUpdateId).tenantId(tenantId).name("name").content("Hello guys my name is {{name}}").variables("[\"name\"]").build())
+        templateRepository.addTemplate(
+            Template.builder().id(templateToUpdateId).tenantId(tenantId).name("name").content("Hello guys my name is {{name}}").variables("[\"name\"]").build()
         );
 
-        var templateService = new TemplateService(tenancyProvider, templateRepository);
         UpdateTemplateRequest updateTemplateRequest = UpdateTemplateRequest
             .builder().name("new name").content("This is {{name}} and I am {{age}}").build();
 
