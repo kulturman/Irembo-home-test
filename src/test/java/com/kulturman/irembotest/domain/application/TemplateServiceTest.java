@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.Collections;
 import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -47,6 +48,26 @@ public class TemplateServiceTest {
 
         assertNotNull(template.getVariables());
         assertEquals("[\"name\", \"lastname\"]", template.getVariables());
+    }
+
+    @Test
+    void shouldUpdateVariablesOnUpdate() {
+        var templateToUpdateId = UUID.randomUUID();
+        UUID tenantId = UUID.randomUUID();
+        when(tenancyProvider.getCurrentTenantId()).thenReturn(tenantId);
+
+        InMemoryTemplateRepository templateRepository = new InMemoryTemplateRepository(
+            Collections.singletonList(Template.builder().id(templateToUpdateId).tenantId(tenantId).name("name").content("Hello guys my name is {{name}}").variables("[\"name\"]").build())
+        );
+
+        var templateService = new TemplateService(tenancyProvider, templateRepository);
+        UpdateTemplateRequest updateTemplateRequest = UpdateTemplateRequest
+            .builder().name("new name").content("This is {{name}} and I am {{age}}").build();
+
+        templateService.updateTemplate(templateToUpdateId, updateTemplateRequest);
+        var updatedTemplate = templateRepository.getSavedTemplates().getFirst();
+
+        assertEquals("[\"name\", \"age\"]", updatedTemplate.getVariables());
     }
 
 }

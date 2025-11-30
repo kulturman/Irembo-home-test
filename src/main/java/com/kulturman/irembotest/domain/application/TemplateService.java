@@ -47,4 +47,14 @@ public class TemplateService {
             .map(v -> "\"" + v + "\"")
             .toList()) + "]";
     }
+
+    public void updateTemplate(UUID templateToUpdateId, UpdateTemplateRequest updateTemplateRequest) {
+        var tenantId = tenancyProvider.getCurrentTenantId();
+        var template = templateRepository.findByIdAndTenantId(templateToUpdateId, tenantId).orElseThrow();
+
+        template.setContent(updateTemplateRequest.getContent());
+        template.setName(updateTemplateRequest.getName());
+        template.setVariables(extractVariables(updateTemplateRequest.getContent()));
+        templateRepository.save(template);
+    }
 }
