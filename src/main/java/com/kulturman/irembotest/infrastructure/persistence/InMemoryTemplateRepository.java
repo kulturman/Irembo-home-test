@@ -2,7 +2,6 @@ package com.kulturman.irembotest.infrastructure.persistence;
 
 import com.kulturman.irembotest.domain.application.entities.Template;
 import com.kulturman.irembotest.domain.ports.TemplateRepository;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
