@@ -49,7 +49,7 @@ public class TemplateServiceTest {
     @Test
     void shouldExtractVariablesFromTemplate() {
         var createTemplateRequest = CreateTemplateRequest
-            .builder().name("name").content("Hello guys my name is {{name}}, {{lastname}}").build();
+            .builder().name("name").content("Hello guys my name is {name}, {lastname}").build();
         var template = templateService.createTemplate(createTemplateRequest);
 
         assertNotNull(template.getVariables());
@@ -61,11 +61,11 @@ public class TemplateServiceTest {
         var templateToUpdateId = UUID.randomUUID();
 
         templateRepository.addTemplate(
-            Template.builder().id(templateToUpdateId).tenantId(tenantId).name("name").content("Hello guys my name is {{name}}").variables("[\"name\"]").build()
+            Template.builder().id(templateToUpdateId).tenantId(tenantId).name("name").content("Hello guys my name is {name}").variables("[\"name\"]").build()
         );
 
         UpdateTemplateRequest updateTemplateRequest = UpdateTemplateRequest
-            .builder().name("new name").content("This is {{name}} and I am {{age}}").build();
+            .builder().name("new name").content("This is {name} and I am {age}").build();
 
         templateService.updateTemplate(templateToUpdateId, updateTemplateRequest);
         var updatedTemplate = templateRepository.getSavedTemplates().getFirst();
@@ -83,7 +83,7 @@ public class TemplateServiceTest {
                 .id(templateToUpdateId)
                 .tenantId(tenantId)
                 .name("name")
-                .content("Hello {{name}}")
+                .content("Hello {name}")
                 .variables("[\"name\"]")
                 .build()
         );

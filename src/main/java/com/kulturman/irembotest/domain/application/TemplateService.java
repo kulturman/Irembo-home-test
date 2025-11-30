@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 public class TemplateService {
     private final TenancyProvider tenancyProvider;
     private final TemplateRepository templateRepository;
-    private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{\\{\\s*(\\w+)\\s*\\}\\}");
+    private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{\\s*(\\w+)\\s*\\}");
 
     public Template createTemplate(CreateTemplateRequest createTemplateRequest) {
         var tenantId = tenancyProvider.getCurrentTenantId();
