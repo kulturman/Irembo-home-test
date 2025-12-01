@@ -23,6 +23,7 @@ public class Certificate {
     private String variables;
     private CertificateStatus status;
     private UUID tenantId;
+    private String filePath;
 
 
     public List<Variable> getVariablesAsList() throws JsonProcessingException {
