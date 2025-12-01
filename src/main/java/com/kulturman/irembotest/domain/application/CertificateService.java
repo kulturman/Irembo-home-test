@@ -26,13 +26,13 @@ public class CertificateService {
     public Certificate generateCertificate(GenerateCertificateRequest request) {
         var tenantId = tenancyProvider.getCurrentTenantId();
 
-        templateRepository.findByIdAndTenantId(request.getTemplateId(), tenantId).orElseThrow(() -> new TemplateNotFoundException("Template not found"));
+        var template = templateRepository.findByIdAndTenantId(request.getTemplateId(), tenantId).orElseThrow(() -> new TemplateNotFoundException("Template not found"));
 
         String variablesJson = getVariablesJson(request);
 
         var certificate = Certificate.builder()
             .id(UUID.randomUUID())
-            .templateId(request.getTemplateId())
+            .template(template)
             .variables(variablesJson)
             .status(CertificateStatus.QUEUED)
             .tenantId(tenantId)
@@ -45,7 +45,6 @@ public class CertificateService {
     }
 
     private String getVariablesJson(GenerateCertificateRequest request) {
-        // Convert Map<String, String> to List<Variable>
         List<Variable> variableList = request.getVariables().entrySet().stream()
             .map(entry -> Variable.builder()
                 .key(entry.getKey())

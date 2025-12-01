@@ -65,7 +65,7 @@ public class CertificateServiceTest {
         Certificate certificate = certificateService.generateCertificate(request);
 
         assertNotNull(certificate.getId());
-        assertEquals(templateId, certificate.getTemplateId());
+        assertEquals(templateId, certificate.getTemplate().getId());
         assertEquals(CertificateStatus.QUEUED, certificate.getStatus());
         assertEquals(tenantId, certificate.getTenantId());
 

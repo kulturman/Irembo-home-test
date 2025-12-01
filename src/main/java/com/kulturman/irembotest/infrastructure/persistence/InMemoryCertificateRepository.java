@@ -6,6 +6,8 @@ import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Getter
 public class InMemoryCertificateRepository implements CertificateRepository {
@@ -13,6 +15,15 @@ public class InMemoryCertificateRepository implements CertificateRepository {
 
     @Override
     public void save(Certificate certificate) {
+        // Remove existing certificate with same ID before adding
+        savedCertificates.removeIf(c -> c.getId().equals(certificate.getId()));
         savedCertificates.add(certificate);
+    }
+
+    @Override
+    public Optional<Certificate> findById(UUID certificateId) {
+        return savedCertificates.stream()
+            .filter(c -> c.getId().equals(certificateId))
+            .findFirst();
     }
 }
