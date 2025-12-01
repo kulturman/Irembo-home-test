@@ -5,18 +5,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kulturman.irembotest.domain.application.entities.Certificate;
 import com.kulturman.irembotest.domain.entities.CertificateStatus;
 import com.kulturman.irembotest.domain.exceptions.TemplateNotFoundException;
+import com.kulturman.irembotest.domain.ports.CertificateQueue;
 import com.kulturman.irembotest.domain.ports.CertificateRepository;
 import com.kulturman.irembotest.domain.ports.TenancyProvider;
 import com.kulturman.irembotest.domain.ports.TemplateRepository;
 import lombok.AllArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 public class CertificateService {
     private final TenancyProvider tenancyProvider;
     private final TemplateRepository templateRepository;
     private final CertificateRepository certificateRepository;
+    private final CertificateQueue certificateQueue;
     private final ObjectMapper objectMapper;
 
     public Certificate generateCertificate(GenerateCertificateRequest request) {
@@ -35,17 +39,25 @@ public class CertificateService {
             .build();
 
         certificateRepository.save(certificate);
+        certificateQueue.publish(certificate);
 
         return certificate;
     }
 
     private String getVariablesJson(GenerateCertificateRequest request) {
-        String variablesJson;
+        // Convert Map<String, String> to List<Variable>
+        List<Variable> variableList = request.getVariables().entrySet().stream()
+            .map(entry -> Variable.builder()
+                .key(entry.getKey())
+                .value(entry.getValue())
+                .build())
+            .collect(Collectors.toList());
+
+        // Serialize to JSON array: [{"key": "name", "value": "John"}]
         try {
-            variablesJson = objectMapper.writeValueAsString(request.getVariables());
+            return objectMapper.writeValueAsString(variableList);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to serialize variables", e);
         }
-        return variablesJson;
     }
 }
