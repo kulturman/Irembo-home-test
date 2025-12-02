@@ -1,10 +1,14 @@
 package com.kulturman.irembotest.domain.application;
 
+import com.kulturman.irembotest.api.dto.TemplateResponse;
 import com.kulturman.irembotest.domain.entities.Template;
 import com.kulturman.irembotest.domain.exceptions.TemplateNotFoundException;
 import com.kulturman.irembotest.domain.ports.TenancyProvider;
 import com.kulturman.irembotest.domain.ports.TemplateRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +17,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @AllArgsConstructor
+@Service
 public class TemplateService {
     private final TenancyProvider tenancyProvider;
     private final TemplateRepository templateRepository;
@@ -58,5 +63,22 @@ public class TemplateService {
         template.setName(updateTemplateRequest.getName());
         template.setVariables(extractVariables(updateTemplateRequest.getContent()));
         templateRepository.save(template);
+    }
+
+    public Page<TemplateResponse> getTemplates(Pageable pageable) {
+        var tenantId = tenancyProvider.getCurrentTenantId();
+        Page<Template> templates = templateRepository.findByTenantId(tenantId, pageable);
+        return templates.map(this::toTemplateResponse);
+    }
+
+    private TemplateResponse toTemplateResponse(Template template) {
+        return TemplateResponse.builder()
+                .id(template.getId())
+                .name(template.getName())
+                .content(template.getContent())
+                .variables(template.getVariables())
+                .createdAt(template.getCreatedAt())
+                .updatedAt(template.getUpdatedAt())
+                .build();
     }
 }
