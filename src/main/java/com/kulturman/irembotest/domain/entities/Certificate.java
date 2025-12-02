@@ -1,10 +1,9 @@
-package com.kulturman.irembotest.domain.application.entities;
+package com.kulturman.irembotest.domain.entities;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kulturman.irembotest.domain.application.Variable;
-import com.kulturman.irembotest.domain.entities.CertificateStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

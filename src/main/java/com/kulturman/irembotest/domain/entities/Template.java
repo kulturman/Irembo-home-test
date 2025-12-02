@@ -1,4 +1,4 @@
-package com.kulturman.irembotest.domain.application.entities;
+package com.kulturman.irembotest.domain.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

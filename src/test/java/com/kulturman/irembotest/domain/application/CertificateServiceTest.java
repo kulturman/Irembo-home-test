@@ -1,8 +1,8 @@
 package com.kulturman.irembotest.domain.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kulturman.irembotest.domain.application.entities.Certificate;
-import com.kulturman.irembotest.domain.application.entities.Template;
+import com.kulturman.irembotest.domain.entities.Certificate;
+import com.kulturman.irembotest.domain.entities.Template;
 import com.kulturman.irembotest.domain.entities.CertificateStatus;
 import com.kulturman.irembotest.domain.exceptions.TemplateNotFoundException;
 import com.kulturman.irembotest.domain.ports.CertificateQueue;

@@ -1,6 +1,6 @@
 package com.kulturman.irembotest.infrastructure.persistence;
 
-import com.kulturman.irembotest.domain.application.entities.Certificate;
+import com.kulturman.irembotest.domain.entities.Certificate;
 import com.kulturman.irembotest.domain.ports.CertificateRepository;
 import lombok.Getter;
 

@@ -1,6 +1,6 @@
 package com.kulturman.irembotest.domain.ports;
 
-import com.kulturman.irembotest.domain.application.entities.Certificate;
+import com.kulturman.irembotest.domain.entities.Certificate;
 
 import java.util.Optional;
 import java.util.UUID;

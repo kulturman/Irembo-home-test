@@ -1,6 +1,6 @@
 package com.kulturman.irembotest.domain.application;
 
-import com.kulturman.irembotest.domain.application.entities.Template;
+import com.kulturman.irembotest.domain.entities.Template;
 import com.kulturman.irembotest.domain.exceptions.TemplateNotFoundException;
 import com.kulturman.irembotest.domain.ports.TenancyProvider;
 import com.kulturman.irembotest.domain.ports.TemplateRepository;
