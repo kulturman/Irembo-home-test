@@ -7,11 +7,13 @@ import com.kulturman.irembotest.domain.ports.CertificateRepository;
 import com.kulturman.irembotest.domain.ports.FileStorage;
 import com.kulturman.irembotest.domain.ports.PdfGenerator;
 import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.UUID;
 
 @AllArgsConstructor
+@Service
 public class CertificateGenerationJob {
     private final CertificateRepository certificateRepository;
     private final PdfGenerator pdfGenerator;

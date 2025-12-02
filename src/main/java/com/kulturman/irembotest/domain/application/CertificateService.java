@@ -10,12 +10,14 @@ import com.kulturman.irembotest.domain.ports.CertificateRepository;
 import com.kulturman.irembotest.domain.ports.TenancyProvider;
 import com.kulturman.irembotest.domain.ports.TemplateRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
+@Service
 public class CertificateService {
     private final TenancyProvider tenancyProvider;
     private final TemplateRepository templateRepository;
