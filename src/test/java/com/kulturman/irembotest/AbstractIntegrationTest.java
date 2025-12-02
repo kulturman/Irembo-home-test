@@ -25,8 +25,7 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     public MockMvc mockMvc;
 
-    @Autowired
-    public ObjectMapper objectMapper;
+    public ObjectMapper objectMapper = new ObjectMapper();
 
     @Container
     @ServiceConnection
