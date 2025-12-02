@@ -26,4 +26,11 @@ public class InMemoryCertificateRepository implements CertificateRepository {
             .filter(c -> c.getId().equals(certificateId))
             .findFirst();
     }
+
+    @Override
+    public Optional<Certificate> findByIdAndTenantId(UUID certificateId, UUID tenantId) {
+        return savedCertificates.stream()
+            .filter(c -> c.getId().equals(certificateId) && c.getTenantId().equals(tenantId))
+            .findFirst();
+    }
 }

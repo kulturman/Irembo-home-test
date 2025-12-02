@@ -8,4 +8,5 @@ import java.util.UUID;
 public interface CertificateRepository {
     void save(Certificate certificate);
     Optional<Certificate> findById(UUID certificateId);
+    Optional<Certificate> findByIdAndTenantId(UUID certificateId, UUID tenantId);
 }
