@@ -10,12 +10,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
 @SpringBootTest
-@Testcontainers
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 public abstract class AbstractIntegrationTest {
@@ -27,23 +23,9 @@ public abstract class AbstractIntegrationTest {
 
     public ObjectMapper objectMapper = new ObjectMapper();
 
-    @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>(DockerImageName.parse("postgres:17-alpine"))
-        .withDatabaseName("irembo_test")
-        .withUsername("test")
-        .withPassword("test")
-        .withReuse(true);
+    static PostgreSQLContainer<?> postgresContainer = TestContainersConfig.getPostgresContainer();
 
-    @Container
     @ServiceConnection
-    static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer(
-        DockerImageName.parse("rabbitmq:4.0-alpine")
-    )
-    .withReuse(true);
-
-    static {
-        postgresContainer.start();
-        rabbitMQContainer.start();
-    }
+    static RabbitMQContainer rabbitMQContainer = TestContainersConfig.getRabbitMqContainer();
 }
