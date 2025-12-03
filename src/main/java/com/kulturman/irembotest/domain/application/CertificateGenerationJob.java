@@ -9,7 +9,6 @@ import com.kulturman.irembotest.domain.ports.PdfGenerator;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -35,10 +34,10 @@ public class CertificateGenerationJob {
             certificate.setFilePath(filePath);
             certificate.setStatus(CertificateStatus.COMPLETED);
             certificateRepository.save(certificate);
-        } catch (IOException e) {
+        } catch (Exception e) {
             certificate.setStatus(CertificateStatus.FAILED);
             certificateRepository.save(certificate);
-            throw new RuntimeException("Failed to store certificate file", e);
+            throw new RuntimeException("Failed to generate or store certificate", e);
         }
     }
 

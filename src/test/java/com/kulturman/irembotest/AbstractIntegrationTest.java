@@ -24,8 +24,8 @@ public abstract class AbstractIntegrationTest {
     public ObjectMapper objectMapper = new ObjectMapper();
 
     @ServiceConnection
-    static PostgreSQLContainer<?> postgresContainer = TestContainersConfig.getPostgresContainer();
+    public static PostgreSQLContainer<?> postgresContainer = TestContainersConfig.getPostgresContainer();
 
     @ServiceConnection
-    static RabbitMQContainer rabbitMQContainer = TestContainersConfig.getRabbitMqContainer();
+    public static RabbitMQContainer rabbitMQContainer = TestContainersConfig.getRabbitMqContainer();
 }

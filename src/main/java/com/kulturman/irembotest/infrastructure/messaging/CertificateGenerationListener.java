@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -15,6 +16,7 @@ public class CertificateGenerationListener {
     private final CertificateGenerationJob certificateGenerationJob;
 
     @RabbitListener(queues = "certificate.generation.queue")
+    @Transactional
     public void processCertificateGeneration(String certificateId) {
         try {
             log.info("Received certificate generation request for Certificate ID: {}", certificateId);

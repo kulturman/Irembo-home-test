@@ -26,3 +26,8 @@ spring:
 jwt:
   secret: test-secret-key-for-testing-purposes-only-make-it-long-enough-for-jwt
   expiration: 86400000
+
+logging:
+  level:
+    com.kulturman.irembotest: DEBUG
+    org.springframework.amqp: DEBUG
