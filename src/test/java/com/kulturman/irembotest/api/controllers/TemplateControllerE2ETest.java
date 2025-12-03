@@ -8,15 +8,16 @@ import com.kulturman.irembotest.infrastructure.persistence.UserDb;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -189,5 +190,38 @@ public class TemplateControllerE2ETest extends AbstractIntegrationTest {
         assertEquals(tenantA, createdTemplate.getTenantId());
         assertNotNull(createdTemplate.getCreatedAt());
         assertNotNull(createdTemplate.getUpdatedAt());
+    }
+
+    @Test
+    void shouldUpdateTemplateSuccessfully() throws Exception {
+        Template existingTemplate = templateRepository.findByTenantId(tenantA, Pageable.unpaged())
+                .getContent().stream()
+                .filter(t -> t.getName().equals("Template A1"))
+                .findFirst()
+                .orElseThrow();
+
+        String updateRequestBody = """
+                {
+                    "name": "Updated Template Name",
+                    "content": "<html><body>Updated content with {newVar1} and {newVar2}</body></html>"
+                }
+                """;
+
+        mockMvc.perform(
+            put("/api/templates/" + existingTemplate.getId())
+                .header("Authorization", "Bearer " + tokenA)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(updateRequestBody)
+            )
+            .andExpect(status().isNoContent());
+
+        Template updatedTemplate = templateRepository.findById(existingTemplate.getId()).orElseThrow();
+
+        assertEquals("Updated Template Name", updatedTemplate.getName());
+        assertEquals("<html><body>Updated content with {newVar1} and {newVar2}</body></html>", updatedTemplate.getContent());
+        assertEquals("[\"newVar1\", \"newVar2\"]", updatedTemplate.getVariables());
+        assertEquals(tenantA, updatedTemplate.getTenantId());
+        assertEquals(existingTemplate.getCreatedAt(), updatedTemplate.getCreatedAt());
+        assertNotEquals(existingTemplate.getUpdatedAt(), updatedTemplate.getUpdatedAt());
     }
 }
