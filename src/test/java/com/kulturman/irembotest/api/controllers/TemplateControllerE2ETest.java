@@ -13,7 +13,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -152,5 +155,39 @@ public class TemplateControllerE2ETest extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].name").value("Template A2"))
                 .andExpect(jsonPath("$.content[1].name").value("Template A1"));
+    }
+
+    @Test
+    void shouldCreateTemplateSuccessfully() throws Exception {
+        String requestBody = """
+                {
+                    "name": "New Certificate Template",
+                    "content": "<html><body>Certificate for {name} - Course: {course} - Date: {date}</body></html>"
+                }
+                """;
+
+        String response = mockMvc.perform(
+            post("/api/templates")
+                .header("Authorization", "Bearer " + tokenA)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)
+            )
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id").exists())
+            .andExpect(jsonPath("$.id").isNotEmpty())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+        UUID createdTemplateId = UUID.fromString(objectMapper.readTree(response).get("id").asText());
+
+        Template createdTemplate = templateRepository.findById(createdTemplateId).orElseThrow();
+
+        assertEquals("New Certificate Template", createdTemplate.getName());
+        assertEquals("<html><body>Certificate for {name} - Course: {course} - Date: {date}</body></html>", createdTemplate.getContent());
+        assertEquals("[\"name\", \"course\", \"date\"]", createdTemplate.getVariables());
+        assertEquals(tenantA, createdTemplate.getTenantId());
+        assertNotNull(createdTemplate.getCreatedAt());
+        assertNotNull(createdTemplate.getUpdatedAt());
     }
 }
