@@ -1,5 +1,6 @@
 package com.kulturman.irembotest.domain.application;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,10 +11,21 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Request to update an existing certificate template's name and/or content")
 public class UpdateTemplateRequest {
     @NotBlank(message = "Template name is required")
+    @Schema(
+        description = "Updated name of the certificate template",
+        example = "Advanced Completion Certificate",
+        required = true
+    )
     private String name;
 
     @NotBlank(message = "Template content is required")
+    @Schema(
+        description = "Updated template content with variable placeholders using {{variableName}} syntax. Variables will be automatically re-extracted and updated.",
+        example = "This is to certify that {{studentName}} has successfully completed the advanced {{courseName}} course with a score of {{score}}% on {{completionDate}}.",
+        required = true
+    )
     private String content;
 }

@@ -33,10 +33,10 @@ public class CertificateGenerationJob {
     private final String baseUrl;
 
     public CertificateGenerationJob(
-            CertificateRepository certificateRepository,
-            PdfGenerator pdfGenerator,
-            FileStorage fileStorage,
-            @Value("${app.back-url}") String baseUrl
+        CertificateRepository certificateRepository,
+        PdfGenerator pdfGenerator,
+        FileStorage fileStorage,
+        @Value("${app.back-url}") String baseUrl
     ) {
         this.certificateRepository = certificateRepository;
         this.pdfGenerator = pdfGenerator;

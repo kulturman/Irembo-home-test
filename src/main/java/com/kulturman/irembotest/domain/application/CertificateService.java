@@ -19,6 +19,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
+@Transactional
 public class CertificateService {
     private final TenancyProvider tenancyProvider;
     private final TemplateRepository templateRepository;
@@ -59,8 +61,7 @@ public class CertificateService {
     }
 
     public CertificateDownload getCertificateForDownload(String token) {
-        Certificate certificate = certificateRepository.findByDownloadToken(token)
-            .orElseThrow(() -> new CertificateNotFoundException("Certificate not found"));
+        Certificate certificate = certificateRepository.findByDownloadToken(token).orElseThrow(() -> new CertificateNotFoundException("Certificate not found"));
 
         if (certificate.getStatus() == CertificateStatus.FAILED) {
             throw new CertificateGenerationFailedException("Certificate generation failed");
@@ -89,11 +90,6 @@ public class CertificateService {
         var tenantId = tenancyProvider.getCurrentTenantId();
         templateRepository.findByIdAndTenantId(templateId, tenantId).orElseThrow(() -> new TemplateNotFoundException("Template not found"));
         return certificateRepository.findByTemplateIdAndTenantId(templateId, tenantId, pageable);
-    }
-
-    public Certificate getCertificateForVerification(UUID certificateId) {
-        return certificateRepository.findById(certificateId)
-            .orElseThrow(() -> new CertificateNotFoundException("Certificate not found"));
     }
 
     public String getProcessedCertificateContent(Certificate certificate) {
