@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -40,23 +40,23 @@ export class TemplateDetailComponent implements OnInit {
   private readonly certificateService = inject(CertificateService);
   private readonly fb = inject(FormBuilder);
 
-  template = signal<TemplateResponse | null>(null);
-  loading = signal(true);
-  error = signal<string | null>(null);
+  template: TemplateResponse | null = null;
+  loading = true;
+  error: string | null = null;
 
-  certificates = signal<CertificateResponse[]>([]);
-  certificatesLoading = signal(false);
-  certificatesError = signal<string | null>(null);
-  downloadingCertificateId = signal<string | null>(null);
-  copiedCertificateId = signal<string | null>(null);
+  certificates: CertificateResponse[] = [];
+  certificatesLoading = false;
+  certificatesError: string | null = null;
+  downloadingCertificateId: string | null = null;
+  copiedCertificateId: string | null = null;
 
   certificateForm: FormGroup;
-  generatingCertificate = signal(false);
+  generatingCertificate = false;
 
-  showEditDialog = signal(false);
+  showEditDialog = false;
   editTemplateForm: FormGroup;
-  editLoading = signal(false);
-  editErrorMessage = signal('');
+  editLoading = false;
+  editErrorMessage = '';
 
   constructor() {
     this.certificateForm = this.fb.group({});
@@ -74,35 +74,35 @@ export class TemplateDetailComponent implements OnInit {
   }
 
   loadTemplate(id: string): void {
-    this.loading.set(true);
-    this.error.set(null);
+    this.loading = true;
+    this.error = null;
 
     this.templateService.getTemplate(id).subscribe({
       next: (data) => {
-        this.template.set(data);
-        this.loading.set(false);
+        this.template = data;
+        this.loading = false;
         this.buildCertificateForm(data);
         this.loadCertificates(id);
       },
       error: () => {
-        this.error.set('Failed to load template. Please try again.');
-        this.loading.set(false);
+        this.error = 'Failed to load template. Please try again.';
+        this.loading = false;
       }
     });
   }
 
   loadCertificates(templateId: string): void {
-    this.certificatesLoading.set(true);
-    this.certificatesError.set(null);
+    this.certificatesLoading = true;
+    this.certificatesError = null;
 
     this.certificateService.getCertificatesByTemplate(templateId).subscribe({
       next: (response) => {
-        this.certificates.set(response.content);
-        this.certificatesLoading.set(false);
+        this.certificates = response.content;
+        this.certificatesLoading = false;
       },
       error: () => {
-        this.certificatesError.set('Failed to load certificates.');
-        this.certificatesLoading.set(false);
+        this.certificatesError = 'Failed to load certificates.';
+        this.certificatesLoading = false;
       }
     });
   }
@@ -132,10 +132,10 @@ export class TemplateDetailComponent implements OnInit {
       return;
     }
 
-    const tmpl = this.template();
+    const tmpl = this.template;
     if (!tmpl) return;
 
-    this.generatingCertificate.set(true);
+    this.generatingCertificate = true;
 
     const request: GenerateCertificateRequest = {
       templateId: tmpl.id,
@@ -144,24 +144,24 @@ export class TemplateDetailComponent implements OnInit {
 
     this.certificateService.generateCertificate(request).subscribe({
       next: (response) => {
-        this.generatingCertificate.set(false);
+        this.generatingCertificate = false;
         this.certificateForm.reset();
         alert(`Certificate generation started! Certificate ID: ${response.id}`);
         // Reload certificates list
         this.loadCertificates(tmpl.id);
       },
       error: () => {
-        this.generatingCertificate.set(false);
+        this.generatingCertificate = false;
         alert('Failed to generate certificate. Please try again.');
       }
     });
   }
 
   onEdit(): void {
-    const tmpl = this.template();
+    const tmpl = this.template;
     if (tmpl) {
-      this.showEditDialog.set(true);
-      this.editErrorMessage.set('');
+      this.showEditDialog = true;
+      this.editErrorMessage = '';
 
       setTimeout(() => {
         this.editTemplateForm.patchValue({
@@ -178,21 +178,21 @@ export class TemplateDetailComponent implements OnInit {
       return;
     }
 
-    const tmpl = this.template();
+    const tmpl = this.template;
     if (!tmpl) return;
 
-    this.editLoading.set(true);
-    this.editErrorMessage.set('');
+    this.editLoading = true;
+    this.editErrorMessage = '';
 
     this.templateService.updateTemplate(tmpl.id, this.editTemplateForm.value).subscribe({
       next: () => {
-        this.editLoading.set(false);
-        this.showEditDialog.set(false);
+        this.editLoading = false;
+        this.showEditDialog = false;
         this.loadTemplate(tmpl.id);
       },
       error: () => {
-        this.editLoading.set(false);
-        this.editErrorMessage.set('Failed to update template. Please try again.');
+        this.editLoading = false;
+        this.editErrorMessage = 'Failed to update template. Please try again.';
       }
     });
   }
@@ -225,7 +225,7 @@ export class TemplateDetailComponent implements OnInit {
   }
 
   onReloadCertificates(): void {
-    const tmpl = this.template();
+    const tmpl = this.template;
     if (tmpl) {
       this.loadCertificates(tmpl.id);
     }
@@ -240,21 +240,20 @@ export class TemplateDetailComponent implements OnInit {
   }
 
   onDownloadCertificate(certificate: CertificateResponse): void {
-    this.downloadingCertificateId.set(certificate.id);
+    this.downloadingCertificateId = certificate.id;
 
     this.certificateService.downloadCertificate(certificate.downloadToken).subscribe({
       next: (blob) => {
-        // Create a download link and trigger download
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
         link.download = `certificate-${certificate.id}.pdf`;
         link.click();
         window.URL.revokeObjectURL(url);
-        this.downloadingCertificateId.set(null);
+        this.downloadingCertificateId = null;
       },
       error: () => {
-        this.downloadingCertificateId.set(null);
+        this.downloadingCertificateId = null;
         alert('Failed to download certificate. Please try again.');
       }
     });
@@ -264,11 +263,11 @@ export class TemplateDetailComponent implements OnInit {
     const downloadUrl = `${window.location.origin}/api/public/certificates/download/${certificate.downloadToken}`;
 
     navigator.clipboard.writeText(downloadUrl).then(() => {
-      this.copiedCertificateId.set(certificate.id);
+      this.copiedCertificateId = certificate.id;
 
       // Reset the copied state after 2 seconds
       setTimeout(() => {
-        this.copiedCertificateId.set(null);
+        this.copiedCertificateId = null;
       }, 2000);
     }).catch(() => {
       alert('Failed to copy link to clipboard.');

@@ -9,7 +9,7 @@
       />
     </div>
 
-    @if (loading()) {
+    @if (loading) {
       <p-card>
         <p-skeleton width="60%" height="2rem" styleClass="mb-4" />
         <p-skeleton width="100%" height="10rem" styleClass="mb-4" />
@@ -17,29 +17,29 @@
       </p-card>
     }
 
-    @if (error()) {
+    @if (error) {
       <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center">
             <i class="pi pi-exclamation-triangle mr-2"></i>
-            {{ error() }}
+            {{ error }}
           </div>
           <p-button
             label="Retry"
             size="small"
             severity="danger"
-            (onClick)="loadTemplate(template()?.id || '')"
+            (onClick)="loadTemplate(template?.id || '')"
           />
         </div>
       </div>
     }
 
-    @if (!loading() && !error() && template()) {
+    @if (!loading && !error && template) {
       <div class="space-y-6">
         <p-card>
           <ng-template pTemplate="header">
             <div class="flex justify-between items-center p-6 pb-0">
-              <h2 class="text-2xl font-bold text-gray-900">{{ template()!.name }}</h2>
+              <h2 class="text-2xl font-bold text-gray-900">{{ template!.name }}</h2>
               <p-button
                 label="Edit Template"
                 icon="pi pi-pencil"
@@ -52,15 +52,15 @@
             <div>
               <h3 class="text-sm font-semibold text-gray-700 mb-2">Content</h3>
               <div class="bg-gray-50 p-4 rounded border border-gray-200">
-                <div [innerHTML]="template()!.content" class="prose max-w-none text-gray-900"></div>
+                <div [innerHTML]="template!.content" class="prose max-w-none text-gray-900"></div>
               </div>
             </div>
 
-            @if (getVariablesArray(template()!.variables).length > 0) {
+            @if (getVariablesArray(template!.variables).length > 0) {
               <div>
                 <h3 class="text-sm font-semibold text-gray-700 mb-2">Variables</h3>
                 <div class="flex flex-wrap gap-2">
-                  @for (variable of getVariablesArray(template()!.variables); track variable) {
+                  @for (variable of getVariablesArray(template!.variables); track variable) {
                     <p-tag [value]="variable" severity="secondary" />
                   }
                 </div>
@@ -69,7 +69,7 @@
 
             <div class="flex items-center text-sm text-gray-500">
               <i class="pi pi-calendar mr-2"></i>
-              <span>Created: {{ template()!.createdAt | date:'MMM d, y, h:mm a' }}</span>
+              <span>Created: {{ template!.createdAt | date:'MMM d, y, h:mm a' }}</span>
             </div>
           </div>
         </p-card>
@@ -82,7 +82,7 @@
           </ng-template>
 
           <form [formGroup]="certificateForm" (ngSubmit)="onGenerateCertificate()" class="space-y-4">
-            @for (variable of getVariablesArray(template()!.variables); track variable) {
+            @for (variable of getVariablesArray(template!.variables); track variable) {
               <div class="flex flex-col gap-2">
                 <p-floatlabel variant="on">
                   <input
@@ -106,14 +106,14 @@
                 type="submit"
                 label="Simulate generation"
                 icon="pi pi-play"
-                [loading]="generatingCertificate()"
-                [disabled]="certificateForm.invalid || generatingCertificate()"
+                [loading]="generatingCertificate"
+                [disabled]="certificateForm.invalid || generatingCertificate"
               /><p-button
                 type="submit"
                 label="Generate Certificate"
                 icon="pi pi-file-pdf"
-                [loading]="generatingCertificate()"
-                [disabled]="certificateForm.invalid || generatingCertificate()"
+                [loading]="generatingCertificate"
+                [disabled]="certificateForm.invalid || generatingCertificate"
               />
             </div>
           </form>
@@ -128,33 +128,33 @@
                 icon="pi pi-refresh"
                 severity="secondary"
                 size="small"
-                [loading]="certificatesLoading()"
+                [loading]="certificatesLoading"
                 (onClick)="onReloadCertificates()"
               />
             </div>
           </ng-template>
 
-          @if (certificatesError()) {
+          @if (certificatesError) {
             <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-4">
               <div class="flex items-center">
                 <i class="pi pi-exclamation-triangle mr-2"></i>
-                {{ certificatesError() }}
+                {{ certificatesError }}
               </div>
             </div>
           }
 
-          @if (certificatesLoading()) {
+          @if (certificatesLoading) {
             <p-skeleton width="100%" height="3rem" styleClass="mb-2" />
             <p-skeleton width="100%" height="3rem" styleClass="mb-2" />
             <p-skeleton width="100%" height="3rem" />
           } @else {
-            @if (certificates().length === 0) {
+            @if (certificates.length === 0) {
               <div class="text-center py-8 text-gray-500">
                 <i class="pi pi-inbox text-4xl mb-4"></i>
                 <p>No certificates generated yet</p>
               </div>
             } @else {
-              <p-table [value]="certificates()" [tableStyle]="{'min-width': '50rem'}">
+              <p-table [value]="certificates" [tableStyle]="{'min-width': '50rem'}">
                 <ng-template pTemplate="header">
                   <tr>
                     <th>Created</th>
@@ -184,15 +184,15 @@
                             icon="pi pi-download"
                             size="small"
                             severity="success"
-                            [loading]="downloadingCertificateId() === cert.id"
-                            [disabled]="downloadingCertificateId() !== null"
+                            [loading]="downloadingCertificateId === cert.id"
+                            [disabled]="downloadingCertificateId !== null"
                             (onClick)="onDownloadCertificate(cert)"
                           />
                           <p-button
-                            [label]="copiedCertificateId() === cert.id ? 'Copied!' : 'Copy Link'"
-                            [icon]="copiedCertificateId() === cert.id ? 'pi pi-check' : 'pi pi-link'"
+                            [label]="copiedCertificateId === cert.id ? 'Copied!' : 'Copy Link'"
+                            [icon]="copiedCertificateId === cert.id ? 'pi pi-check' : 'pi pi-link'"
                             size="small"
-                            [severity]="copiedCertificateId() === cert.id ? 'success' : 'secondary'"
+                            [severity]="copiedCertificateId === cert.id ? 'success' : 'secondary'"
                             [outlined]="true"
                             (onClick)="onCopyCertificateLink(cert)"
                           />
@@ -213,8 +213,8 @@
     }
 
     <p-dialog
-      [visible]="showEditDialog()"
-      (visibleChange)="showEditDialog.set($event)"
+      [visible]="showEditDialog"
+      (visibleChange)="showEditDialog = $event"
       [modal]="true"
       [closable]="true"
       [draggable]="false"
@@ -259,9 +259,9 @@
           }
         </div>
 
-        @if (editErrorMessage()) {
+        @if (editErrorMessage) {
           <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
-            {{ editErrorMessage() }}
+            {{ editErrorMessage }}
           </div>
         }
 
@@ -270,13 +270,13 @@
             type="button"
             label="Cancel"
             severity="secondary"
-            (onClick)="showEditDialog.set(false)"
+            (onClick)="showEditDialog = false"
           />
           <p-button
             type="submit"
             label="Save Changes"
-            [loading]="editLoading()"
-            [disabled]="editTemplateForm.invalid || editLoading()"
+            [loading]="editLoading"
+            [disabled]="editTemplateForm.invalid || editLoading"
           />
         </div>
       </form>
