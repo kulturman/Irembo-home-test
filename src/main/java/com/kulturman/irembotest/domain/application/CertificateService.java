@@ -16,6 +16,8 @@ import com.kulturman.irembotest.domain.ports.TenancyProvider;
 import com.kulturman.irembotest.domain.ports.TemplateRepository;
 import com.kulturman.irembotest.infrastructure.util.TokenGenerator;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -81,6 +83,12 @@ public class CertificateService {
         } catch (IOException e) {
             throw new CertificateFileNotFoundException("Failed to retrieve certificate file", e);
         }
+    }
+
+    public Page<Certificate> getCertificatesByTemplate(UUID templateId, Pageable pageable) {
+        var tenantId = tenancyProvider.getCurrentTenantId();
+        templateRepository.findByIdAndTenantId(templateId, tenantId).orElseThrow(() -> new TemplateNotFoundException("Template not found"));
+        return certificateRepository.findByTemplateIdAndTenantId(templateId, tenantId, pageable);
     }
 
     private String getVariablesJson(GenerateCertificateRequest request) {

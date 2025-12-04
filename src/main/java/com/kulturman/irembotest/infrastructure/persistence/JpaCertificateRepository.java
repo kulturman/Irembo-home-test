@@ -3,6 +3,8 @@ package com.kulturman.irembotest.infrastructure.persistence;
 import com.kulturman.irembotest.domain.entities.Certificate;
 import com.kulturman.irembotest.domain.ports.CertificateRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -31,5 +33,10 @@ public class JpaCertificateRepository implements CertificateRepository {
     @Override
     public Optional<Certificate> findByDownloadToken(String downloadToken) {
         return certificateDb.findByDownloadToken(downloadToken);
+    }
+
+    @Override
+    public Page<Certificate> findByTemplateIdAndTenantId(UUID templateId, UUID tenantId, Pageable pageable) {
+        return certificateDb.findByTemplateIdAndTenantId(templateId, tenantId, pageable);
     }
 }

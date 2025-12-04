@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -45,6 +46,10 @@ public class CertificateControllerE2ETest extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        certificateRepository.deleteAll();
+        templateRepository.deleteAll();
+        userRepository.deleteAll();
+
         tenantA = UUID.randomUUID();
         userA = User.builder()
                 .id(UUID.randomUUID())
@@ -117,5 +122,109 @@ public class CertificateControllerE2ETest extends AbstractIntegrationTest {
         assertEquals(CertificateStatus.COMPLETED, completedCertificate.getStatus());
         assertNotNull(completedCertificate.getFilePath());
         assertTrue(completedCertificate.getFilePath().contains(".pdf"));
+    }
+
+    @Test
+    void shouldGetCertificatesByTemplateSuccessfully() throws Exception {
+        // Create multiple certificates for templateA
+        Certificate cert1 = Certificate.builder()
+                .id(UUID.randomUUID())
+                .template(templateA)
+                .tenantId(tenantA)
+                .variables("[{\"key\":\"name\",\"value\":\"John\"},{\"key\":\"course\",\"value\":\"Java\"}]")
+                .status(CertificateStatus.COMPLETED)
+                .downloadToken("token1")
+                .build();
+
+        Certificate cert2 = Certificate.builder()
+                .id(UUID.randomUUID())
+                .template(templateA)
+                .tenantId(tenantA)
+                .variables("[{\"key\":\"name\",\"value\":\"Jane\"},{\"key\":\"course\",\"value\":\"Python\"}]")
+                .status(CertificateStatus.QUEUED)
+                .downloadToken("token2")
+                .build();
+
+        Certificate cert3 = Certificate.builder()
+                .id(UUID.randomUUID())
+                .template(templateA)
+                .tenantId(tenantA)
+                .variables("[{\"key\":\"name\",\"value\":\"Bob\"},{\"key\":\"course\",\"value\":\"Go\"}]")
+                .status(CertificateStatus.FAILED)
+                .downloadToken("token3")
+                .build();
+
+        certificateRepository.save(cert1);
+        certificateRepository.save(cert2);
+        certificateRepository.save(cert3);
+
+        // Get certificates for templateA
+        mockMvc.perform(get("/api/certificates/by-template/{templateId}", templateA.getId())
+                        .header("Authorization", "Bearer " + tokenA)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(3))
+                .andExpect(jsonPath("$.content[0].id").exists())
+                .andExpect(jsonPath("$.content[0].templateId").value(templateA.getId().toString()))
+                .andExpect(jsonPath("$.content[0].templateName").value("Certificate of Achievement A"))
+                .andExpect(jsonPath("$.content[0].status").exists())
+                .andExpect(jsonPath("$.content[0].downloadToken").exists())
+                .andExpect(jsonPath("$.content[0].createdAt").exists())
+                .andExpect(jsonPath("$.totalElements").value(3))
+                .andExpect(jsonPath("$.totalPages").value(1))
+                .andExpect(jsonPath("$.size").value(20));
+    }
+
+
+    @Test
+    void shouldReturn404WhenTemplateNotFound() throws Exception {
+        UUID nonExistentTemplateId = UUID.randomUUID();
+
+        mockMvc.perform(get("/api/certificates/by-template/{templateId}", nonExistentTemplateId)
+                        .header("Authorization", "Bearer " + tokenA)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldNotAccessCertificatesFromDifferentTenant() throws Exception {
+        // Create a different tenant with their own template
+        UUID tenantB = UUID.randomUUID();
+        User userB = User.builder()
+                .id(UUID.randomUUID())
+                .tenantId(tenantB)
+                .email("userB@example.com")
+                .password(passwordEncoder.encode("password"))
+                .name("User B")
+                .build();
+        userRepository.save(userB);
+        String tokenB = jwtService.generateToken(userB);
+
+        Template templateB = Template.builder()
+                .id(UUID.randomUUID())
+                .tenantId(tenantB)
+                .name("Template B")
+                .content("<html><body>Test</body></html>")
+                .variables("[]")
+                .build();
+        templateRepository.save(templateB);
+
+        // Create certificate for tenant A
+        Certificate certA = Certificate.builder()
+                .id(UUID.randomUUID())
+                .template(templateA)
+                .tenantId(tenantA)
+                .variables("[]")
+                .status(CertificateStatus.COMPLETED)
+                .downloadToken("tokenA")
+                .build();
+        certificateRepository.save(certA);
+
+        // User B tries to access certificates from tenant A's template
+        mockMvc.perform(get("/api/certificates/by-template/{templateId}", templateA.getId())
+                        .header("Authorization", "Bearer " + tokenB)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 }

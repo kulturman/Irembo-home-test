@@ -1,6 +1,8 @@
 package com.kulturman.irembotest.domain.ports;
 
 import com.kulturman.irembotest.domain.entities.Certificate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -10,4 +12,5 @@ public interface CertificateRepository {
     Optional<Certificate> findById(UUID certificateId);
     Optional<Certificate> findByIdAndTenantId(UUID certificateId, UUID tenantId);
     Optional<Certificate> findByDownloadToken(String downloadToken);
+    Page<Certificate> findByTemplateIdAndTenantId(UUID templateId, UUID tenantId, Pageable pageable);
 }
