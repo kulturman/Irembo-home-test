@@ -11,7 +11,8 @@ import { EditorModule } from 'primeng/editor';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TagModule } from 'primeng/tag';
 import { TemplateService } from '../../core/services/template.service';
-import { TemplateResponse } from '../../core/models/template.models';
+import { CertificateService } from '../../core/services/certificate.service';
+import { TemplateResponse, GenerateCertificateRequest } from '../../core/models/template.models';
 
 @Component({
   selector: 'app-template-detail',
@@ -34,6 +35,7 @@ export class TemplateDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly templateService = inject(TemplateService);
+  private readonly certificateService = inject(CertificateService);
   private readonly fb = inject(FormBuilder);
 
   template = signal<TemplateResponse | null>(null);
@@ -105,8 +107,28 @@ export class TemplateDetailComponent implements OnInit {
       return;
     }
 
+    const tmpl = this.template();
+    if (!tmpl) return;
+
     this.generatingCertificate.set(true);
-    console.log('Generate certificate with:', this.certificateForm.value);
+
+    const request: GenerateCertificateRequest = {
+      templateId: tmpl.id,
+      variables: this.certificateForm.value
+    };
+
+    this.certificateService.generateCertificate(request).subscribe({
+      next: (response) => {
+        this.generatingCertificate.set(false);
+        // TODO: Show success message and provide download link using response.id
+        console.log('Certificate generated successfully:', response.id);
+        alert(`Certificate generation started! Certificate ID: ${response.id}`);
+      },
+      error: () => {
+        this.generatingCertificate.set(false);
+        alert('Failed to generate certificate. Please try again.');
+      }
+    });
   }
 
   onEdit(): void {

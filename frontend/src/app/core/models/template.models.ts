@@ -33,3 +33,8 @@ export interface PageResponse<T> {
   first: boolean;
   empty: boolean;
 }
+
+export interface GenerateCertificateRequest {
+  templateId: string;
+  variables: { [key: string]: string };
+}
