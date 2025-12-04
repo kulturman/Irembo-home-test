@@ -71,6 +71,13 @@ public class TemplateService {
         return templates.map(this::toTemplateResponse);
     }
 
+    public TemplateResponse getTemplate(UUID id) {
+        var tenantId = tenancyProvider.getCurrentTenantId();
+        Template template = templateRepository.findByIdAndTenantId(id, tenantId)
+            .orElseThrow(() -> new TemplateNotFoundException("Template not found"));
+        return toTemplateResponse(template);
+    }
+
     private TemplateResponse toTemplateResponse(Template template) {
         return TemplateResponse.builder()
                 .id(template.getId())

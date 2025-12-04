@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
-import { CreateTemplateRequest, TemplateResponse, ResourceId, PageResponse } from '../models/template.models';
+import { CreateTemplateRequest, UpdateTemplateRequest, TemplateResponse, ResourceId, PageResponse } from '../models/template.models';
 
 @Injectable({
   providedIn: 'root'
@@ -19,5 +19,13 @@ export class TemplateService {
     return this.http.get<PageResponse<TemplateResponse>>(this.apiUrl).pipe(
       map(response => response.content)
     );
+  }
+
+  getTemplate(id: string): Observable<TemplateResponse> {
+    return this.http.get<TemplateResponse>(`${this.apiUrl}/${id}`);
+  }
+
+  updateTemplate(id: string, request: UpdateTemplateRequest): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${id}`, request);
   }
 }

@@ -3,6 +3,11 @@ export interface CreateTemplateRequest {
   content: string;
 }
 
+export interface UpdateTemplateRequest {
+  name: string;
+  content: string;
+}
+
 export interface TemplateResponse {
   id: string;
   name: string;

@@ -224,4 +224,27 @@ public class TemplateControllerE2ETest extends AbstractIntegrationTest {
         assertEquals(existingTemplate.getCreatedAt(), updatedTemplate.getCreatedAt());
         assertNotEquals(existingTemplate.getUpdatedAt(), updatedTemplate.getUpdatedAt());
     }
+
+    @Test
+    void shouldGetSingleTemplateSuccessfully() throws Exception {
+        Template template = Template.builder()
+                .id(UUID.randomUUID())
+                .tenantId(tenantA)
+                .name("Single Template Test")
+                .content("<html><body>Test content for {userName}</body></html>")
+                .variables("[\"userName\"]")
+                .build();
+        templateRepository.save(template);
+
+        mockMvc.perform(get("/api/templates/{id}", template.getId())
+                        .header("Authorization", "Bearer " + tokenA)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(template.getId().toString()))
+                .andExpect(jsonPath("$.name").value("Single Template Test"))
+                .andExpect(jsonPath("$.content").value("<html><body>Test content for {userName}</body></html>"))
+                .andExpect(jsonPath("$.variables").value("[\"userName\"]"))
+                .andExpect(jsonPath("$.createdAt").exists())
+                .andExpect(jsonPath("$.updatedAt").exists());
+    }
 }

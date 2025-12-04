@@ -27,6 +27,11 @@ public class TemplateController {
         return ResponseEntity.ok(templateService.getTemplates(pageable));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<TemplateResponse> getTemplate(@PathVariable UUID id) {
+        return ResponseEntity.ok(templateService.getTemplate(id));
+    }
+
     @PostMapping
     public ResponseEntity<ResourceId> createTemplate(@Valid @RequestBody CreateTemplateRequest request) {
         Template template = templateService.createTemplate(request);

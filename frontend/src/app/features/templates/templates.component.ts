@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
@@ -34,6 +35,7 @@ export class TemplatesComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly templateService = inject(TemplateService);
   private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
 
   templates = signal<TemplateResponse[]>([]);
   loading = signal(false);
@@ -115,6 +117,10 @@ export class TemplatesComponent implements OnInit {
     } catch {
       return [];
     }
+  }
+
+  onViewTemplate(id: string): void {
+    this.router.navigate(['/templates', id]);
   }
 
   onLogout(): void {
