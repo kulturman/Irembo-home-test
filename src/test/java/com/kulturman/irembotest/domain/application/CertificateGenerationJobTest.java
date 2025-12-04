@@ -35,7 +35,7 @@ public class CertificateGenerationJobTest {
     FileStorage fileStorage;
 
     @BeforeEach
-    void setUp() throws IOException {
+    void setUp() {
         certificateRepository = new InMemoryCertificateRepository();
         certificateGenerationJob = new CertificateGenerationJob(certificateRepository, pdfGenerator, fileStorage);
     }
@@ -91,7 +91,7 @@ public class CertificateGenerationJobTest {
     @Test
     void shouldSaveFileAndStoreFilePathInCertificate() throws IOException {
         UUID certificateId = UUID.randomUUID();
-        String expectedFilePath = "cert-" + certificateId + ".pdf";
+        String expectedFilePath = certificateId + "/cert-" + certificateId + ".pdf";
         byte[] expectedPdfContent = new byte[]{10, 20, 30, 40, 50};
 
         when(pdfGenerator.generatePdf(anyString())).thenReturn(expectedPdfContent);

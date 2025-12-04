@@ -42,7 +42,8 @@ public class CertificateGenerationJob {
     }
 
     private String generateFileName(UUID certificateId) {
-        return String.format("cert-%s.pdf", certificateId);
+        //Each tenant gets a new directory of their own
+        return String.format("%s/cert-%s.pdf", certificateId, certificateId);
     }
 
     private String replaceVariables(Certificate certificate) {
