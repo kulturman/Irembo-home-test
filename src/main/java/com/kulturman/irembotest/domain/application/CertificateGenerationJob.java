@@ -11,7 +11,6 @@ import com.kulturman.irembotest.domain.ports.CertificateRepository;
 import com.kulturman.irembotest.domain.ports.FileStorage;
 import com.kulturman.irembotest.domain.ports.PdfGenerator;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -25,16 +24,25 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.UUID;
 
-@RequiredArgsConstructor
 @Service
 @Transactional
 public class CertificateGenerationJob {
     private final CertificateRepository certificateRepository;
     private final PdfGenerator pdfGenerator;
     private final FileStorage fileStorage;
+    private final String baseUrl;
 
-    @Value("${app.back-url}")
-    private String baseUrl;
+    public CertificateGenerationJob(
+            CertificateRepository certificateRepository,
+            PdfGenerator pdfGenerator,
+            FileStorage fileStorage,
+            @Value("${app.back-url}") String baseUrl
+    ) {
+        this.certificateRepository = certificateRepository;
+        this.pdfGenerator = pdfGenerator;
+        this.fileStorage = fileStorage;
+        this.baseUrl = baseUrl;
+    }
 
     public void execute(UUID certificateId) {
         var certificate = certificateRepository.findById(certificateId).orElseThrow(() -> new RuntimeException("Certificate not found"));
@@ -68,15 +76,13 @@ public class CertificateGenerationJob {
 
             // Get the last page to add QR code
             PDPage lastPage = document.getPage(document.getNumberOfPages() - 1);
-
-            // Convert BufferedImage to PDImageXObject
             PDImageXObject pdImage = LosslessFactory.createFromImage(document, qrImage);
 
             // Add QR code to page (bottom right corner)
             try (PDPageContentStream contentStream = new PDPageContentStream(
                 document, lastPage, PDPageContentStream.AppendMode.APPEND, true)) {
 
-                float xPosition = lastPage.getMediaBox().getWidth() - 120; // 20px margin from right
+                float xPosition = lastPage.getMediaBox().getWidth() - 120;
                 float yPosition = 20; // 20px from bottom
 
                 contentStream.drawImage(pdImage, xPosition, yPosition, 100, 100);
@@ -96,7 +102,7 @@ public class CertificateGenerationJob {
     }
 
     private String generateVerifyUrl(UUID certificateId) {
-        return String.format("%s/api/public/verify-certificate/%s", baseUrl, certificateId.toString());
+        return String.format("%s/api/public/certificates/verify/%s", baseUrl, certificateId.toString());
     }
 
     private String generateFileName(UUID certificateId) {

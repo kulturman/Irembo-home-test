@@ -1,7 +1,6 @@
 spring:
   application:
     name: IremboTest
-    back-url: ${BACK_URL:http://localhost:8080}
 
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5420/irembo}
@@ -31,3 +30,6 @@ spring:
 jwt:
   secret: ${JWT_SECRET:your-256-bit-secret-key-change-this-in-production-please-make-it-long-enough}
   expiration: 86400000
+
+app:
+  back-url: ${BACK_URL:http://localhost:8080}

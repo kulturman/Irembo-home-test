@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Verification</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .certificate-card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .status-banner {
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+            color: white;
+        }
+
+        .status-completed {
+            background: #10b981;
+        }
+
+        .status-processing {
+            background: #3b82f6;
+        }
+
+        .status-queued {
+            background: #6b7280;
+        }
+
+        .status-failed {
+            background: #ef4444;
+        }
+
+        .certificate-info {
+            padding: 2rem;
+            border-bottom: 2px solid #f3f4f6;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .certificate-content {
+            padding: 2rem;
+        }
+
+        .content-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 1rem;
+        }
+
+        .rendered-content {
+            padding: 1.5rem;
+            background: #f9fafb;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .download-section {
+            padding: 2rem;
+            background: #f9fafb;
+            text-align: center;
+        }
+
+        .download-button {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .download-button:hover {
+            background: #5568d3;
+        }
+
+        .download-button.disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 2rem;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.75rem;
+            }
+
+            .certificate-info,
+            .certificate-content,
+            .download-section {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Certificate Verification</h1>
+            <p>Verify the authenticity of your certificate</p>
+        </div>
+
+        <!-- Certificate Not Found -->
+        <div class="certificate-card" th:if="${!found}">
+            <div class="status-banner" style="background: #ef4444;">
+                <span>CERTIFICATE NOT FOUND</span>
+            </div>
+
+            <div class="certificate-content" style="text-align: center; padding: 3rem 2rem;">
+                <svg style="width: 80px; height: 80px; margin: 0 auto 1.5rem; color: #ef4444;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h2 style="font-size: 1.5rem; color: #111827; margin-bottom: 1rem;">Certificate Not Found</h2>
+                <p style="color: #6b7280; margin-bottom: 0.5rem;">The certificate with ID:</p>
+                <p style="font-family: monospace; color: #374151; font-weight: 600; margin-bottom: 1.5rem;" th:text="${certificateId}">certificate-id</p>
+                <p style="color: #6b7280;">
+                    This certificate does not exist or may have been removed.<br>
+                    Please verify the QR code or link you scanned.
+                </p>
+            </div>
+        </div>
+
+        <!-- Certificate Found -->
+        <div class="certificate-card" th:if="${found}">
+            <div th:class="'status-banner status-' + ${#strings.toLowerCase(status)}">
+                <span th:text="${status}">COMPLETED</span>
+            </div>
+
+            <div class="certificate-info">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Issue Date</span>
+                        <span class="info-value" th:text="${#temporals.format(createdAt, 'MMM dd, yyyy')}">Jan 01, 2025</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Certificate ID</span>
+                        <span class="info-value" th:text="${certificate.id}">123-456-789</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="certificate-content">
+                <h2 class="content-title">Certificate Content</h2>
+                <div class="rendered-content" th:utext="${processedContent}">
+                    Certificate content will be rendered here...
+                </div>
+            </div>
+
+            <div class="download-section" th:if="${status.toString() != 'COMPLETED'}">
+                <p th:if="${status.toString() == 'PROCESSING'}" style="color: #3b82f6; font-weight: 600;">
+                    Your certificate is being processed. Please check back in a few moments.
+                </p>
+                <p th:if="${status.toString() == 'QUEUED'}" style="color: #6b7280; font-weight: 600;">
+                    Your certificate is queued for generation.
+                </p>
+                <p th:if="${status.toString() == 'FAILED'}" style="color: #ef4444; font-weight: 600;">
+                    Certificate generation failed. Please contact support.
+                </p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2025 Sec CERTIFICATE. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

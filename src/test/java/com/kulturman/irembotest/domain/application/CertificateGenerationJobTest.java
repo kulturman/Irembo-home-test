@@ -40,7 +40,12 @@ public class CertificateGenerationJobTest {
     @BeforeEach
     void setUp() throws IOException {
         certificateRepository = new InMemoryCertificateRepository();
-        certificateGenerationJob = new CertificateGenerationJob(certificateRepository, pdfGenerator, fileStorage);
+        certificateGenerationJob = new CertificateGenerationJob(
+                certificateRepository,
+                pdfGenerator,
+                fileStorage,
+                "http://localhost:8080"
+        );
         lenient().when(pdfGenerator.generatePdf(anyString())).thenReturn(createValidPdfBytes());
     }
 
