@@ -15,12 +15,12 @@
       </div>
     </div>
 
-    @if (error) {
+    @if (error()) {
       <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center">
             <i class="pi pi-exclamation-triangle mr-2"></i>
-            {{ error }}
+            {{ error() }}
           </div>
           <p-button
             label="Retry"
@@ -32,7 +32,7 @@
       </div>
     }
 
-    @if (loading) {
+    @if (loading()) {
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         @for (item of [1,2,3,4,5,6]; track item) {
           <p-card>
@@ -47,82 +47,78 @@
       </div>
     }
 
-    @if (!loading) {
-      <p-dataview [value]="templates">
-        <ng-template pTemplate="list" let-templates>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            @for (template of templates; track template.id) {
-              <p-card>
-                <ng-template pTemplate="header">
-                  <div class="flex justify-between items-start p-4 pb-0">
-                    <h3 class="text-xl font-semibold text-gray-900">
-                      {{ template.name }}
-                    </h3>
-                  </div>
-                </ng-template>
+    @if (!loading() && !error()) {
+      @if (templates().length === 0) {
+        <div class="text-center py-12">
+          <i class="pi pi-file text-6xl text-gray-300"></i>
+          <h3 class="text-xl font-semibold text-gray-600 mt-4">
+            No Templates Found
+          </h3>
+          <p class="text-gray-500 mt-2">
+            Get started by creating your first certificate template
+          </p>
+          <p-button
+            label="Create Template"
+            icon="pi pi-plus"
+            (onClick)="openCreateDialog()"
+            styleClass="mt-4"
+          />
+        </div>
+      } @else {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          @for (template of templates(); track template.id) {
+            <p-card>
+              <ng-template pTemplate="header">
+                <div class="flex justify-between items-start p-4 pb-0">
+                  <h3 class="text-xl font-semibold text-gray-900">
+                    {{ template.name }}
+                  </h3>
+                </div>
+              </ng-template>
 
-                <div class="space-y-3">
-                  <div class="text-gray-600 text-sm">
-                    {{ getContentPreview(template.content) }}
-                  </div>
-
-                  @if (template.variables) {
-                    <div class="flex flex-wrap gap-1">
-                      @for (variable of template.variables.split(','); track variable) {
-                        <p-tag
-                          [value]="variable.trim()"
-                          severity="secondary"
-                        />
-                      }
-                    </div>
-                  }
-
-                  <div class="flex items-center text-xs text-gray-500">
-                    <i class="pi pi-calendar mr-1"></i>
-                    <span>{{ template.createdAt | date:'MMM d, y' }}</span>
-                  </div>
+              <div class="space-y-3">
+                <div class="text-gray-600 text-sm">
+                  {{ getContentPreview(template.content) }}
                 </div>
 
-                <ng-template pTemplate="footer">
-                  <div class="flex gap-2">
-                    <p-button
-                      label="Edit"
-                      icon="pi pi-pencil"
-                      severity="secondary"
-                      size="small"
-                      [style]="{'flex': '1'}"
-                    />
-                    <p-button
-                      icon="pi pi-trash"
-                      severity="danger"
-                      size="small"
-                      [outlined]="true"
-                    />
+                @if (template.variables && getVariablesArray(template.variables).length > 0) {
+                  <div class="flex flex-wrap gap-1">
+                    @for (variable of getVariablesArray(template.variables); track variable) {
+                      <p-tag
+                        [value]="variable"
+                        severity="secondary"
+                      />
+                    }
                   </div>
-                </ng-template>
-              </p-card>
-            }
-          </div>
-        </ng-template>
+                }
 
-        <ng-template pTemplate="empty">
-          <div class="text-center py-12">
-            <i class="pi pi-file text-6xl text-gray-300"></i>
-            <h3 class="text-xl font-semibold text-gray-600 mt-4">
-              No Templates Found
-            </h3>
-            <p class="text-gray-500 mt-2">
-              Get started by creating your first certificate template
-            </p>
-            <p-button
-              label="Create Template"
-              icon="pi pi-plus"
-              (onClick)="openCreateDialog()"
-              styleClass="mt-4"
-            />
-          </div>
-        </ng-template>
-      </p-dataview>
+                <div class="flex items-center text-xs text-gray-500">
+                  <i class="pi pi-calendar mr-1"></i>
+                  <span>{{ template.createdAt | date:'MMM d, y' }}</span>
+                </div>
+              </div>
+
+              <ng-template pTemplate="footer">
+                <div class="flex gap-2">
+                  <p-button
+                    label="Edit"
+                    icon="pi pi-pencil"
+                    severity="secondary"
+                    size="small"
+                    [style]="{'flex': '1'}"
+                  />
+                  <p-button
+                    icon="pi pi-trash"
+                    severity="danger"
+                    size="small"
+                    [outlined]="true"
+                  />
+                </div>
+              </ng-template>
+            </p-card>
+          }
+        </div>
+      }
     }
 
     <p-dialog

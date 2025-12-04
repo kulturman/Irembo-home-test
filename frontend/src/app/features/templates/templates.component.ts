@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
@@ -7,7 +7,6 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { EditorModule } from 'primeng/editor';
-import { DataViewModule } from 'primeng/dataview';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TagModule } from 'primeng/tag';
 import { AuthService } from '../../core/auth/auth.service';
@@ -25,7 +24,6 @@ import { TemplateResponse } from '../../core/models/template.models';
     InputTextModule,
     FloatLabelModule,
     EditorModule,
-    DataViewModule,
     SkeletonModule,
     TagModule,
     ReactiveFormsModule
@@ -37,9 +35,9 @@ export class TemplatesComponent implements OnInit {
   private readonly templateService = inject(TemplateService);
   private readonly fb = inject(FormBuilder);
 
-  templates: TemplateResponse[] = [];
-  loading = false;
-  error: string | null = null;
+  templates = signal<TemplateResponse[]>([]);
+  loading = signal(false);
+  error = signal<string | null>(null);
 
   showCreateDialog = false;
   createTemplateForm: FormGroup;
@@ -58,17 +56,17 @@ export class TemplatesComponent implements OnInit {
   }
 
   loadTemplates(): void {
-    this.loading = true;
-    this.error = null;
+    this.loading.set(true);
+    this.error.set(null);
 
     this.templateService.getTemplates().subscribe({
       next: (data) => {
-        this.templates = data;
-        this.loading = false;
+        this.templates.set(data);
+        this.loading.set(false);
       },
       error: () => {
-        this.error = 'Failed to load templates. Please try again.';
-        this.loading = false;
+        this.error.set('Failed to load templates. Please try again.');
+        this.loading.set(false);
       }
     });
   }
@@ -109,6 +107,14 @@ export class TemplatesComponent implements OnInit {
     return text.length > maxLength
       ? text.substring(0, maxLength) + '...'
       : text;
+  }
+
+  getVariablesArray(variables: string): string[] {
+    try {
+      return JSON.parse(variables);
+    } catch {
+      return [];
+    }
   }
 
   onLogout(): void {
