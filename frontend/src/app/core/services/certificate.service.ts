@@ -23,4 +23,11 @@ export class CertificateService {
 
     return this.http.get<PageResponse<CertificateResponse>>(`${this.apiUrl}/by-template/${templateId}`, { params });
   }
+
+  downloadCertificate(downloadToken: string): Observable<Blob> {
+    const publicUrl = `${environment.apiUrl}/api/public/certificates/download/${downloadToken}`;
+    return this.http.get(publicUrl, {
+      responseType: 'blob'
+    });
+  }
 }

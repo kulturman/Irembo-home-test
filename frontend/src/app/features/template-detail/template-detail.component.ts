@@ -47,6 +47,8 @@ export class TemplateDetailComponent implements OnInit {
   certificates = signal<CertificateResponse[]>([]);
   certificatesLoading = signal(false);
   certificatesError = signal<string | null>(null);
+  downloadingCertificateId = signal<string | null>(null);
+  copiedCertificateId = signal<string | null>(null);
 
   certificateForm: FormGroup;
   generatingCertificate = signal(false);
@@ -235,5 +237,41 @@ export class TemplateDetailComponent implements OnInit {
     } catch {
       return [];
     }
+  }
+
+  onDownloadCertificate(certificate: CertificateResponse): void {
+    this.downloadingCertificateId.set(certificate.id);
+
+    this.certificateService.downloadCertificate(certificate.downloadToken).subscribe({
+      next: (blob) => {
+        // Create a download link and trigger download
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `certificate-${certificate.id}.pdf`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        this.downloadingCertificateId.set(null);
+      },
+      error: () => {
+        this.downloadingCertificateId.set(null);
+        alert('Failed to download certificate. Please try again.');
+      }
+    });
+  }
+
+  onCopyCertificateLink(certificate: CertificateResponse): void {
+    const downloadUrl = `${window.location.origin}/api/public/certificates/download/${certificate.downloadToken}`;
+
+    navigator.clipboard.writeText(downloadUrl).then(() => {
+      this.copiedCertificateId.set(certificate.id);
+
+      // Reset the copied state after 2 seconds
+      setTimeout(() => {
+        this.copiedCertificateId.set(null);
+      }, 2000);
+    }).catch(() => {
+      alert('Failed to copy link to clipboard.');
+    });
   }
 }
