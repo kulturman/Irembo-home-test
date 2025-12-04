@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface CertificateDb extends JpaRepository<Certificate, UUID> {
     Optional<Certificate> findByIdAndTenantId(UUID id, UUID tenantId);
+    Optional<Certificate> findByDownloadToken(String downloadToken);
 }

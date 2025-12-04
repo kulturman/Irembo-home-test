@@ -33,4 +33,11 @@ public class InMemoryCertificateRepository implements CertificateRepository {
             .filter(c -> c.getId().equals(certificateId) && c.getTenantId().equals(tenantId))
             .findFirst();
     }
+
+    @Override
+    public Optional<Certificate> findByDownloadToken(String downloadToken) {
+        return savedCertificates.stream()
+            .filter(c -> downloadToken.equals(c.getDownloadToken()))
+            .findFirst();
+    }
 }

@@ -6,6 +6,7 @@ import com.kulturman.irembotest.domain.entities.CertificateStatus;
 import com.kulturman.irembotest.domain.ports.CertificateRepository;
 import com.kulturman.irembotest.domain.ports.FileStorage;
 import com.kulturman.irembotest.domain.ports.PdfGenerator;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.util.UUID;
 
 @AllArgsConstructor
 @Service
+@Transactional
 public class CertificateGenerationJob {
     private final CertificateRepository certificateRepository;
     private final PdfGenerator pdfGenerator;

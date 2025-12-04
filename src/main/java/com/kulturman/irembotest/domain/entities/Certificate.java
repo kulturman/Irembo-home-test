@@ -45,6 +45,9 @@ public class Certificate {
     @Column(name = "file_path", length = 500)
     private String filePath;
 
+    @Column(name = "download_token", unique = true, length = 64)
+    private String downloadToken;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

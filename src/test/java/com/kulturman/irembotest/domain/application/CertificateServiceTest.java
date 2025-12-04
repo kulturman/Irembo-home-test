@@ -6,9 +6,11 @@ import com.kulturman.irembotest.domain.entities.Template;
 import com.kulturman.irembotest.domain.entities.CertificateStatus;
 import com.kulturman.irembotest.domain.exceptions.TemplateNotFoundException;
 import com.kulturman.irembotest.domain.ports.CertificateQueue;
+import com.kulturman.irembotest.domain.ports.FileStorage;
 import com.kulturman.irembotest.domain.ports.TenancyProvider;
 import com.kulturman.irembotest.infrastructure.persistence.InMemoryCertificateRepository;
 import com.kulturman.irembotest.infrastructure.persistence.InMemoryTemplateRepository;
+import com.kulturman.irembotest.infrastructure.util.TokenGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +31,9 @@ public class CertificateServiceTest {
     @Mock
     CertificateQueue certificateQueue;
 
+    @Mock
+    FileStorage fileStorage;
+
     InMemoryTemplateRepository templateRepository;
     InMemoryCertificateRepository certificateRepository;
     CertificateService certificateService;
@@ -40,7 +45,7 @@ public class CertificateServiceTest {
         templateRepository = new InMemoryTemplateRepository();
         certificateRepository = new InMemoryCertificateRepository();
         objectMapper = new ObjectMapper();
-        certificateService = new CertificateService(tenancyProvider, templateRepository, certificateRepository, certificateQueue, objectMapper);
+        certificateService = new CertificateService(tenancyProvider, templateRepository, certificateRepository, certificateQueue, objectMapper, new TokenGenerator(), fileStorage);
         when(tenancyProvider.getCurrentTenantId()).thenReturn(tenantId);
     }
 

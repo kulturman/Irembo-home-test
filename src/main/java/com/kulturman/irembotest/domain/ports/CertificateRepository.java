@@ -9,4 +9,5 @@ public interface CertificateRepository {
     void save(Certificate certificate);
     Optional<Certificate> findById(UUID certificateId);
     Optional<Certificate> findByIdAndTenantId(UUID certificateId, UUID tenantId);
+    Optional<Certificate> findByDownloadToken(String downloadToken);
 }

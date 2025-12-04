@@ -27,4 +27,9 @@ public class JpaCertificateRepository implements CertificateRepository {
     public Optional<Certificate> findByIdAndTenantId(UUID certificateId, UUID tenantId) {
         return certificateDb.findByIdAndTenantId(certificateId, tenantId);
     }
+
+    @Override
+    public Optional<Certificate> findByDownloadToken(String downloadToken) {
+        return certificateDb.findByDownloadToken(downloadToken);
+    }
 }

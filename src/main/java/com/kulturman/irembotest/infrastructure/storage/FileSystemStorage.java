@@ -29,6 +29,12 @@ public class FileSystemStorage implements FileStorage {
         return filePath.toAbsolutePath().toString();
     }
 
+    @Override
+    public byte[] retrieve(String filePath) throws IOException {
+        Path path = Paths.get(filePath);
+        return Files.readAllBytes(path);
+    }
+
     private void createBaseDirectoryIfNotExists() {
         try {
             Files.createDirectories(Paths.get(baseDirectory));
