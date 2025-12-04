@@ -6,12 +6,15 @@ import com.kulturman.irembotest.domain.entities.CertificateStatus;
 import com.kulturman.irembotest.domain.ports.FileStorage;
 import com.kulturman.irembotest.domain.ports.PdfGenerator;
 import com.kulturman.irembotest.infrastructure.persistence.InMemoryCertificateRepository;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -35,9 +38,19 @@ public class CertificateGenerationJobTest {
     FileStorage fileStorage;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
         certificateRepository = new InMemoryCertificateRepository();
         certificateGenerationJob = new CertificateGenerationJob(certificateRepository, pdfGenerator, fileStorage);
+        lenient().when(pdfGenerator.generatePdf(anyString())).thenReturn(createValidPdfBytes());
+    }
+
+    private byte[] createValidPdfBytes() throws IOException {
+        try (PDDocument document = new PDDocument();
+             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            document.addPage(new PDPage());
+            document.save(outputStream);
+            return outputStream.toByteArray();
+        }
     }
 
     @Test
@@ -46,6 +59,7 @@ public class CertificateGenerationJobTest {
             Certificate.builder()
                 .id(certificatedWithPlaceHoldersId)
                 .status(CertificateStatus.QUEUED)
+                .downloadToken(UUID.randomUUID().toString())
                 .template(
                     Template.builder()
                         .id(UUID.randomUUID())
@@ -70,6 +84,7 @@ public class CertificateGenerationJobTest {
             Certificate.builder()
                 .id(certificateWithoutPlaceHoldersId)
                 .status(CertificateStatus.QUEUED)
+                .downloadToken(UUID.randomUUID().toString())
                 .template(
                     Template.builder()
                         .id(UUID.randomUUID())
@@ -92,15 +107,16 @@ public class CertificateGenerationJobTest {
     void shouldSaveFileAndStoreFilePathInCertificate() throws IOException {
         UUID certificateId = UUID.randomUUID();
         String expectedFilePath = certificateId + "/cert-" + certificateId + ".pdf";
-        byte[] expectedPdfContent = new byte[]{10, 20, 30, 40, 50};
+        byte[] validPdfBytes = createValidPdfBytes();
 
-        when(pdfGenerator.generatePdf(anyString())).thenReturn(expectedPdfContent);
+        when(pdfGenerator.generatePdf(anyString())).thenReturn(validPdfBytes);
         when(fileStorage.store(anyString(), any(byte[].class))).thenReturn(expectedFilePath);
 
         certificateRepository.save(
             Certificate.builder()
                 .id(certificateId)
                 .status(CertificateStatus.QUEUED)
+                .downloadToken(UUID.randomUUID().toString())
                 .template(
                     Template.builder()
                         .id(UUID.randomUUID())
@@ -117,10 +133,7 @@ public class CertificateGenerationJobTest {
 
         certificateGenerationJob.execute(certificateId);
 
-        verify(fileStorage).store(
-            expectedFilePath,
-            expectedPdfContent
-        );
+        verify(fileStorage).store(eq(expectedFilePath), any(byte[].class));
 
         Certificate updatedCertificate = certificateRepository.findById(certificateId).orElseThrow();
         assertNotNull(updatedCertificate.getFilePath());

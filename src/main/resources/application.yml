@@ -1,6 +1,7 @@
 spring:
   application:
     name: IremboTest
+    back-url: ${BACK_URL:http://localhost:8080}
 
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5420/irembo}
