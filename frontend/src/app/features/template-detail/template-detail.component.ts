@@ -10,9 +10,10 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { EditorModule } from 'primeng/editor';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TagModule } from 'primeng/tag';
+import { TableModule } from 'primeng/table';
 import { TemplateService } from '../../core/services/template.service';
 import { CertificateService } from '../../core/services/certificate.service';
-import { TemplateResponse, GenerateCertificateRequest } from '../../core/models/template.models';
+import { TemplateResponse, GenerateCertificateRequest, CertificateResponse, CertificateStatus } from '../../core/models/template.models';
 
 @Component({
   selector: 'app-template-detail',
@@ -27,6 +28,7 @@ import { TemplateResponse, GenerateCertificateRequest } from '../../core/models/
     EditorModule,
     SkeletonModule,
     TagModule,
+    TableModule,
     ReactiveFormsModule
   ],
   templateUrl: './template-detail.component.html'
@@ -41,6 +43,10 @@ export class TemplateDetailComponent implements OnInit {
   template = signal<TemplateResponse | null>(null);
   loading = signal(true);
   error = signal<string | null>(null);
+
+  certificates = signal<CertificateResponse[]>([]);
+  certificatesLoading = signal(false);
+  certificatesError = signal<string | null>(null);
 
   certificateForm: FormGroup;
   generatingCertificate = signal(false);
@@ -74,10 +80,27 @@ export class TemplateDetailComponent implements OnInit {
         this.template.set(data);
         this.loading.set(false);
         this.buildCertificateForm(data);
+        this.loadCertificates(id);
       },
       error: () => {
         this.error.set('Failed to load template. Please try again.');
         this.loading.set(false);
+      }
+    });
+  }
+
+  loadCertificates(templateId: string): void {
+    this.certificatesLoading.set(true);
+    this.certificatesError.set(null);
+
+    this.certificateService.getCertificatesByTemplate(templateId).subscribe({
+      next: (response) => {
+        this.certificates.set(response.content);
+        this.certificatesLoading.set(false);
+      },
+      error: () => {
+        this.certificatesError.set('Failed to load certificates.');
+        this.certificatesLoading.set(false);
       }
     });
   }
@@ -120,9 +143,10 @@ export class TemplateDetailComponent implements OnInit {
     this.certificateService.generateCertificate(request).subscribe({
       next: (response) => {
         this.generatingCertificate.set(false);
-        // TODO: Show success message and provide download link using response.id
-        console.log('Certificate generated successfully:', response.id);
+        this.certificateForm.reset();
         alert(`Certificate generation started! Certificate ID: ${response.id}`);
+        // Reload certificates list
+        this.loadCertificates(tmpl.id);
       },
       error: () => {
         this.generatingCertificate.set(false);
@@ -181,5 +205,35 @@ export class TemplateDetailComponent implements OnInit {
 
   get editContent() {
     return this.editTemplateForm.get('content');
+  }
+
+  getStatusSeverity(status: CertificateStatus): 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast' {
+    switch (status) {
+      case CertificateStatus.COMPLETED:
+        return 'success';
+      case CertificateStatus.PROCESSING:
+        return 'info';
+      case CertificateStatus.QUEUED:
+        return 'secondary';
+      case CertificateStatus.FAILED:
+        return 'danger';
+      default:
+        return 'contrast';
+    }
+  }
+
+  onReloadCertificates(): void {
+    const tmpl = this.template();
+    if (tmpl) {
+      this.loadCertificates(tmpl.id);
+    }
+  }
+
+  getVariablesFromJson(variables: string): Array<{key: string, value: string}> {
+    try {
+      return JSON.parse(variables);
+    } catch {
+      return [];
+    }
   }
 }
