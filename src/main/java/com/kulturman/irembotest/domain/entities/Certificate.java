@@ -60,4 +60,20 @@ public class Certificate {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(getVariables(), new TypeReference<List<Variable>>() {});
     }
+
+    public String replaceVariables() {
+        var templateContent = template.getContent();
+        try {
+            var variables = getVariablesAsList();
+
+            for (Variable variable : variables) {
+                templateContent = templateContent.replace("{" + variable.getKey() + "}", variable.getValue());
+            }
+
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        return templateContent;
+    }
 }

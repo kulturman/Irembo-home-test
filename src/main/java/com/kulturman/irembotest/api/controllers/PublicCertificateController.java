@@ -98,7 +98,7 @@ public class PublicCertificateController {
     ) {
         try {
             Certificate certificate = certificateRepository.findById(id).orElseThrow(() -> new CertificateNotFoundException("Certificate not found"));
-            String processedContent = certificateService.getProcessedCertificateContent(certificate);
+            String processedContent = certificate.replaceVariables();
 
             model.addAttribute("certificate", certificate);
             model.addAttribute("processedContent", processedContent);

@@ -51,7 +51,7 @@ public class CertificateGenerationJob {
             certificate.setStatus(CertificateStatus.PROCESSING);
             certificateRepository.save(certificate);
 
-            var processedTemplate = replaceVariables(certificate);
+            var processedTemplate = certificate.replaceVariables();
             var pdfContent = addQrCode(pdfGenerator.generatePdf(processedTemplate), certificateId);
             var fileName = generateFileName(certificateId);
             var filePath = fileStorage.store(fileName, pdfContent);
@@ -108,21 +108,5 @@ public class CertificateGenerationJob {
     private String generateFileName(UUID certificateId) {
         //Each tenant gets a new directory of their own
         return String.format("%s/cert-%s.pdf", certificateId, certificateId);
-    }
-
-    private String replaceVariables(Certificate certificate) {
-        var templateContent = certificate.getTemplate().getContent();
-        try {
-            var variables = certificate.getVariablesAsList();
-
-            for (Variable variable : variables) {
-                templateContent = templateContent.replace("{" + variable.getKey() + "}", variable.getValue());
-            }
-
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
-        return templateContent;
     }
 }

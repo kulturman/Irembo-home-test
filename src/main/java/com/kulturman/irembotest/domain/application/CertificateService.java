@@ -92,20 +92,6 @@ public class CertificateService {
         return certificateRepository.findByTemplateIdAndTenantId(templateId, tenantId, pageable);
     }
 
-    public String getProcessedCertificateContent(Certificate certificate) {
-        String content = certificate.getTemplate().getContent();
-
-        try {
-            List<Variable> variables = certificate.getVariablesAsList();
-            for (Variable variable : variables) {
-                content = content.replace("{" + variable.getKey() + "}", variable.getValue());
-            }
-            return content;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to process certificate variables", e);
-        }
-    }
-
     private String getVariablesJson(GenerateCertificateRequest request) {
         List<Variable> variableList = request.getVariables().entrySet().stream()
             .map(entry -> Variable.builder()
