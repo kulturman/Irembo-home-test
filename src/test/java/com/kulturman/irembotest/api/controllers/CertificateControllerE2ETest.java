@@ -1,8 +1,6 @@
 package com.kulturman.irembotest.api.controllers;
 
 import com.kulturman.irembotest.AbstractIntegrationTest;
-import com.kulturman.irembotest.domain.application.CertificateService;
-import com.kulturman.irembotest.domain.application.GenerateCertificateRequest;
 import com.kulturman.irembotest.domain.entities.Certificate;
 import com.kulturman.irembotest.domain.entities.CertificateStatus;
 import com.kulturman.irembotest.domain.entities.Template;
@@ -12,24 +10,22 @@ import com.kulturman.irembotest.infrastructure.persistence.TemplateDb;
 import com.kulturman.irembotest.infrastructure.persistence.UserDb;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class CertificateGenerationE2ETest extends AbstractIntegrationTest {
+public class CertificateControllerE2ETest extends AbstractIntegrationTest {
     @Autowired
     private UserDb userRepository;
 
@@ -40,65 +36,70 @@ public class CertificateGenerationE2ETest extends AbstractIntegrationTest {
     private CertificateDb certificateRepository;
 
     @Autowired
-    private CertificateService certificateService;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private RabbitTemplate rabbitTemplate;
-
-    private Template template;
+    private UUID tenantA;
+    private User userA;
+    private String tokenA;
+    private Template templateA;
 
     @BeforeEach
     void setUp() {
-        UUID tenantId = UUID.randomUUID();
-        User user = User.builder()
+        tenantA = UUID.randomUUID();
+        userA = User.builder()
                 .id(UUID.randomUUID())
-                .tenantId(tenantId)
-                .email("arnaud@example.com")
+                .tenantId(tenantA)
+                .email("userA@example.com")
                 .password(passwordEncoder.encode("password"))
-                .name("Test User")
+                .name("User A")
                 .build();
 
-        userRepository.save(user);
+        userRepository.save(userA);
 
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-                user,
-            null,
-            null
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        tokenA = jwtService.generateToken(userA);
 
-        template = Template.builder()
+        templateA = Template.builder()
                 .id(UUID.randomUUID())
-                .tenantId(tenantId)
-                .name("Certificate of Achievement")
+                .tenantId(tenantA)
+                .name("Certificate of Achievement A")
                 .content("<html><body>Certificate for {name} - Course: {course}</body></html>")
                 .variables("[\"name\", \"course\"]")
                 .build();
 
-        templateRepository.save(template);
+        templateRepository.save(templateA);
     }
 
     @Test
-    void shouldGenerateCertificateThroughRabbitMQ() {
-        Map<String, String> variables = new HashMap<>();
-        variables.put("name", "Arnaud");
-        variables.put("course", "Spring Boot Development");
+    void shouldGenerateCertificateSuccessfully() throws Exception {
+        String requestBody = """
+                {
+                    "templateId": "%s",
+                    "variables": {
+                        "name": "Arnaud",
+                        "course": "Spring Boot Development"
+                    }
+                }
+                """.formatted(templateA.getId());
 
-        GenerateCertificateRequest request = GenerateCertificateRequest.builder()
-                .templateId(template.getId())
-                .variables(variables)
-                .build();
+        String response = mockMvc.perform(
+            post("/api/certificates")
+                .header("Authorization", "Bearer " + tokenA)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)
+            )
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id").exists())
+            .andExpect(jsonPath("$.id").isNotEmpty())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
 
-        Certificate certificate = certificateService.generateCertificate(request);
+        UUID certificateId = UUID.fromString(objectMapper.readTree(response).get("id").asText());
 
-        assertNotNull(certificate);
+        Certificate certificate = certificateRepository.findById(certificateId).orElseThrow();
         assertEquals(CertificateStatus.QUEUED, certificate.getStatus());
         assertNull(certificate.getFilePath());
-
-        UUID certificateId = certificate.getId();
+        assertEquals(tenantA, certificate.getTenantId());
 
         await()
             .atMost(10, TimeUnit.SECONDS)
@@ -112,8 +113,9 @@ public class CertificateGenerationE2ETest extends AbstractIntegrationTest {
                         .isEqualTo(CertificateStatus.COMPLETED);
             });
 
-        Certificate completedCertificate = certificateRepository.findById(certificateId).orElseThrow(() -> new AssertionError("Certificate not found"));
+        Certificate completedCertificate = certificateRepository.findById(certificateId).orElseThrow();
         assertEquals(CertificateStatus.COMPLETED, completedCertificate.getStatus());
         assertNotNull(completedCertificate.getFilePath());
+        assertTrue(completedCertificate.getFilePath().contains(".pdf"));
     }
 }
