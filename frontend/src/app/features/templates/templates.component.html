@@ -65,7 +65,7 @@
             <p-card [style]="{'cursor': 'pointer'}" (click)="onViewTemplate(template.id)">
               <ng-template pTemplate="header">
                 <div class="flex justify-between items-start p-4 pb-0">
-                  <h3 class="text-xl font-semibold text-gray-900">
+                  <h3 class="text-xl font-semibold text-white-900">
                     {{ template.name }}
                   </h3>
                 </div>
@@ -149,8 +149,7 @@
             id="content"
             formControlName="content"
             [style]="{'height':'320px'}"
-            placeholder="Enter template content with placeholders like {name}, {date}, etc."
-          />
+            placeholder="Enter template content with placeholders like {name}, {date}, etc."></p-editor>
           @if (content?.invalid && content?.touched) {
             <small class="text-red-600">Template content is required</small>
           }
