@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.util.UUID;
 
 @Service
-@Transactional
 public class CertificateGenerationJob {
     private final CertificateRepository certificateRepository;
     private final PdfGenerator pdfGenerator;
