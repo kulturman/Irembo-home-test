@@ -26,6 +26,11 @@ spring:
     port: ${RABBITMQ_PORT:5670}
     username: ${RABBITMQ_USERNAME:guest}
     password: ${RABBITMQ_PASSWORD:guest}
+    listener:
+      simple:
+        auto-startup: true
+        concurrency: 10
+        max-concurrency: 10
 
 jwt:
   secret: ${JWT_SECRET:your-256-bit-secret-key-change-this-in-production-please-make-it-long-enough}
