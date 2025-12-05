@@ -1,1 +1,38 @@
-<router-outlet />
+<div class="min-h-screen bg-gray-50">
+  @if (showHeader) {
+    <header class="bg-white shadow-sm border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-6 py-4">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-6">
+            <h1 class="text-2xl font-bold text-gray-900">Sec CERTIFICATE</h1>
+            <nav class="flex gap-2">
+              <p-button
+                label="Templates"
+                icon="pi pi-file"
+                (onClick)="navigateToTemplates()"
+                [text]="true"></p-button>
+              @if (isAdmin) {
+                <p-button
+                  label="Users"
+                  icon="pi pi-users"
+                  (onClick)="navigateToUsers()"
+                  [text]="true"></p-button>
+              }
+            </nav>
+          </div>
+          <div class="flex gap-2">
+            <p-button
+              label="Logout"
+              icon="pi pi-sign-out"
+              (onClick)="onLogout()"
+              severity="secondary"></p-button>
+          </div>
+        </div>
+      </div>
+    </header>
+  }
+
+  <main>
+    <router-outlet />
+  </main>
+</div>

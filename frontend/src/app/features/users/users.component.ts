@@ -1,6 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -33,7 +32,6 @@ export class UsersComponent implements OnInit {
   private readonly userService = inject(UserService);
   private readonly fb = inject(FormBuilder);
   private readonly messageService = inject(MessageService);
-  private readonly router = inject(Router);
 
   users: UserResponse[] = [];
   totalRecords = 0;
@@ -130,9 +128,5 @@ export class UsersComponent implements OnInit {
       hour: '2-digit',
       minute: '2-digit'
     });
-  }
-
-  goBack(): void {
-    this.router.navigate(['/templates']);
   }
 }

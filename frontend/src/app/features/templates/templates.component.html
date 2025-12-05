@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-50 p-8">
+<div class="p-8">
   <div class="max-w-7xl mx-auto">
     <div class="flex justify-between items-center mb-8">
       <h1 class="text-3xl font-bold text-gray-900">Certificate Templates</h1>
@@ -7,18 +7,6 @@
           label="Create Template"
           icon="pi pi-plus"
           (onClick)="openCreateDialog()"></p-button>
-        @if (isAdmin) {
-          <p-button
-            label="User Management"
-            icon="pi pi-users"
-            (onClick)="navigateToUsers()"
-            severity="info"></p-button>
-        }
-        <p-button
-          label="Logout"
-          icon="pi pi-sign-out"
-          (onClick)="onLogout()"
-          severity="secondary"></p-button>
       </div>
     </div>
 
