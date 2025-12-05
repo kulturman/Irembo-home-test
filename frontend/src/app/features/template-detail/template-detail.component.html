@@ -104,10 +104,10 @@
             <div class="flex justify-end gap-2">
               <p-button
                 type="submit"
-                label="Simulate generation"
+                label="Simulate generation (Not implemented)"
                 icon="pi pi-play"
+                [disabled]="true"
                 [loading]="generatingCertificate"
-                [disabled]="certificateForm.invalid || generatingCertificate"
               /><p-button
                 type="submit"
                 label="Generate Certificate"

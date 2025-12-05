@@ -19,7 +19,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.List;
@@ -28,7 +27,6 @@ import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
-@Transactional
 public class CertificateService {
     private final TenancyProvider tenancyProvider;
     private final TemplateRepository templateRepository;
