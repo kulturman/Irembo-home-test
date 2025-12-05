@@ -42,3 +42,23 @@ springdoc:
     tags-sorter: alpha
     operations-sorter: alpha
   show-actuator: false
+
+---
+# Production profile with high concurrency
+spring:
+  config:
+    activate:
+      on-profile: prod
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5670}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 2000
+          max-interval: 10000
+          multiplier: 2
+          max-retries: 3
