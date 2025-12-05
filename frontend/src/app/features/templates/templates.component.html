@@ -7,6 +7,13 @@
           label="Create Template"
           icon="pi pi-plus"
           (onClick)="openCreateDialog()"></p-button>
+        @if (isAdmin) {
+          <p-button
+            label="User Management"
+            icon="pi pi-users"
+            (onClick)="navigateToUsers()"
+            severity="info"></p-button>
+        }
         <p-button
           label="Logout"
           icon="pi pi-sign-out"

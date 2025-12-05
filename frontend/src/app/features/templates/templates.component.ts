@@ -40,6 +40,7 @@ export class TemplatesComponent implements OnInit {
   templates = signal<TemplateResponse[]>([]);
   loading = signal(false);
   error = signal<string | null>(null);
+  isAdmin = false;
 
   showCreateDialog = false;
   createTemplateForm: FormGroup;
@@ -54,6 +55,7 @@ export class TemplatesComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.isAdmin = this.authService.isAdmin();
     this.loadTemplates();
   }
 
@@ -125,6 +127,10 @@ export class TemplatesComponent implements OnInit {
 
   onLogout(): void {
     this.authService.logout();
+  }
+
+  navigateToUsers(): void {
+    this.router.navigate(['/users']);
   }
 
   get name() {

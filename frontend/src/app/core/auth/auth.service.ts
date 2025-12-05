@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
 import { LoginRequest, AuthResponse } from '../models/auth.models';
+import { UserRole } from '../models/user.models';
 
 @Injectable({
   providedIn: 'root'
@@ -40,5 +41,34 @@ export class AuthService {
 
   removeToken(): void {
     sessionStorage.removeItem(this.TOKEN_KEY);
+  }
+
+  getUserRole(): UserRole | null {
+    const token = this.getToken();
+    if (!token) {
+      return null;
+    }
+
+    try {
+      const payload = this.decodeToken(token);
+      return payload.role || null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  isAdmin(): boolean {
+    return this.getUserRole() === UserRole.ADMIN;
+  }
+
+  private decodeToken(token: string): any {
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      throw new Error('Invalid JWT token');
+    }
+
+    const payload = parts[1];
+    const decoded = atob(payload);
+    return JSON.parse(decoded);
   }
 }
