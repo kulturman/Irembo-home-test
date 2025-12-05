@@ -31,6 +31,12 @@ spring:
         auto-startup: true
         concurrency: 10
         max-concurrency: 10
+        retry:
+          enabled: true
+          initial-interval: 2000
+          max-interval: 10000
+          multiplier: 2
+          max-retries: 3
 
 jwt:
   secret: ${JWT_SECRET:your-256-bit-secret-key-change-this-in-production-please-make-it-long-enough}
