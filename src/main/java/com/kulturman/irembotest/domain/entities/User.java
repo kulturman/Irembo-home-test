@@ -35,6 +35,11 @@ public class User {
     @Column(length = 255)
     private String name;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
+    @Builder.Default
+    private UserRole role = UserRole.USER;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

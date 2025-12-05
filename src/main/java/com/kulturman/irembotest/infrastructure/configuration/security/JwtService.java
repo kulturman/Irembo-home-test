@@ -27,6 +27,7 @@ public class JwtService {
         return Jwts.builder()
                 .subject(user.getEmail())
                 .claim("tenantId", user.getTenantId().toString())
+                .claim("role", user.getRole().name())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(secretKey)
@@ -52,6 +53,10 @@ public class JwtService {
     public UUID extractTenantId(String token) {
         String tenantId = getClaims(token).get("tenantId", String.class);
         return UUID.fromString(tenantId);
+    }
+
+    public String extractRole(String token) {
+        return getClaims(token).get("role", String.class);
     }
 
     private Claims getClaims(String token) {
