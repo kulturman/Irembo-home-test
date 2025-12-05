@@ -62,3 +62,5 @@ spring:
           max-interval: 10000
           multiplier: 2
           max-retries: 3
+        concurrency: 10
+        max-concurrency: 10
