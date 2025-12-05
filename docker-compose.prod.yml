@@ -1,0 +1,85 @@
+services:
+  database:
+    image: postgres:16-alpine
+    container_name: irembo-database
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - irembo-data:/var/lib/postgresql/data
+    networks:
+      - irembo-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  queue:
+    image: rabbitmq:management-alpine
+    container_name: irembo-queue
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+      - JAVA_OPTS=${JAVA_OPTS:--XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - irembo-queue-data:/var/lib/rabbitmq
+    networks:
+      - irembo-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    image: ghcr.io/kulturman/irembo-home-test:IMAGE_SHA_PLACEHOLDER
+    container_name: irembo-backend
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+      queue:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      # Service discovery values (internal Docker network)
+      - DATABASE_URL=jdbc:postgresql://database:5432/${POSTGRES_DB}
+      - RABBITMQ_HOST=queue
+      - RABBITMQ_PORT=5672
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    volumes:
+      - ./irembo-storage:/app/storage
+      - ./irembo-certificates:/app/certificates
+    networks:
+      - irembo-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  irembo-data:
+    driver: local
+  irembo-queue-data:
+    driver: local
+  irembo-storage:
+    driver: local
+  irembo-certificates:
+    driver: local
+
+networks:
+  irembo-network:
+    driver: bridge
