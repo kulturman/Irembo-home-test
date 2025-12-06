@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dataset>
-    <!-- Template A (Tenant A) -->
+    <!-- Template A (Tenant A) - used in CertificateControllerE2ETest -->
     <templates id="c3d4e5f6-a7b8-4c7d-0e1f-2a3b4c5d6e7f"
                tenant_id="f1e2d3c4-b5a6-4d5e-9f0a-1b2c3d4e5f6a"
                name="Certificate of Achievement A"
@@ -9,17 +9,53 @@
                created_at="2025-01-01 00:00:00"
                updated_at="2025-01-01 00:00:00"/>
 
-    <!-- Template B (Tenant B) -->
+    <!-- Template A1 (Tenant A) - used in TemplateControllerE2ETest -->
     <templates id="d4e5f6a7-b8c9-4d8e-1f0a-3b4c5d6e7f8a"
+               tenant_id="f1e2d3c4-b5a6-4d5e-9f0a-1b2c3d4e5f6a"
+               name="Template A1"
+               content="Content for tenant A template 1"
+               variables="[&quot;var1&quot;]"
+               created_at="2025-01-01 00:00:00"
+               updated_at="2025-01-01 00:00:00"/>
+
+    <!-- Template A2 (Tenant A) - used in TemplateControllerE2ETest -->
+    <templates id="e5f6a7b8-c9d0-4e9f-2a1b-4c5d6e7f8a9b"
+               tenant_id="f1e2d3c4-b5a6-4d5e-9f0a-1b2c3d4e5f6a"
+               name="Template A2"
+               content="Content for tenant A template 2"
+               variables="[&quot;var2&quot;]"
+               created_at="2025-01-01 00:00:00"
+               updated_at="2025-01-01 00:00:00"/>
+
+    <!-- Template B1 (Tenant B) - used in TemplateControllerE2ETest -->
+    <templates id="f6a7b8c9-d0e1-4f0a-3b2c-5d6e7f8a9b0c"
                tenant_id="e2d3c4b5-a6f7-4e5d-0f9a-2b3c4d5e6f7a"
-               name="Template B"
-               content="Simple certificate template B"
-               variables="[]"
+               name="Template B1"
+               content="Content for tenant B template 1"
+               variables="[&quot;var3&quot;]"
+               created_at="2025-01-01 00:00:00"
+               updated_at="2025-01-01 00:00:00"/>
+
+    <!-- Template for Certificate Generation (Tenant A) - used in CertificateGenerationE2ETest -->
+    <templates id="3c4d5e6f-7a8b-4c9d-0e1f-2a3b4c5d6e7f"
+               tenant_id="f1e2d3c4-b5a6-4d5e-9f0a-1b2c3d4e5f6a"
+               name="Certificate of Achievement"
+               content="&lt;html&gt;&lt;body&gt;Certificate for {name} - Course: {course}&lt;/body&gt;&lt;/html&gt;"
+               variables="[&quot;name&quot;, &quot;course&quot;]"
+               created_at="2025-01-01 00:00:00"
+               updated_at="2025-01-01 00:00:00"/>
+
+    <!-- Template for Public Download (Tenant A) - used in PublicCertificateDownloadE2ETest -->
+    <templates id="4d5e6f7a-8b9c-4d0e-1f2a-3b4c5d6e7f8a"
+               tenant_id="f1e2d3c4-b5a6-4d5e-9f0a-1b2c3d4e5f6a"
+               name="Certificate of Completion"
+               content="&lt;html&gt;&lt;body&gt;Certificate for {studentName} - Course: {courseName}&lt;/body&gt;&lt;/html&gt;"
+               variables="[&quot;studentName&quot;, &quot;courseName&quot;]"
                created_at="2025-01-01 00:00:00"
                updated_at="2025-01-01 00:00:00"/>
 
     <!-- Certificate 1 for Template A (COMPLETED) -->
-    <certificates id="e5f6a7b8-c9d0-4e9f-2a1b-4c5d6e7f8a9b"
+    <certificates id="a7b8c9d0-e1f2-4a1b-4c3d-6e7f8a9b0c1d"
                   template_id="c3d4e5f6-a7b8-4c7d-0e1f-2a3b4c5d6e7f"
                   tenant_id="f1e2d3c4-b5a6-4d5e-9f0a-1b2c3d4e5f6a"
                   variables="[]"
@@ -29,7 +65,7 @@
                   updated_at="2025-01-01 00:00:00"/>
 
     <!-- Certificate 2 for Template A (QUEUED) -->
-    <certificates id="f6a7b8c9-d0e1-4f0a-3b2c-5d6e7f8a9b0c"
+    <certificates id="b8c9d0e1-f2a3-4b2c-5d4e-7f8a9b0c1d2e"
                   template_id="c3d4e5f6-a7b8-4c7d-0e1f-2a3b4c5d6e7f"
                   tenant_id="f1e2d3c4-b5a6-4d5e-9f0a-1b2c3d4e5f6a"
                   variables="[]"
@@ -39,7 +75,7 @@
                   updated_at="2025-01-01 00:00:00"/>
 
     <!-- Certificate 3 for Template A (FAILED) -->
-    <certificates id="a7b8c9d0-e1f2-4a1b-4c3d-6e7f8a9b0c1d"
+    <certificates id="c9d0e1f2-a3b4-4c5d-6e7f-8a9b0c1d2e3f"
                   template_id="c3d4e5f6-a7b8-4c7d-0e1f-2a3b4c5d6e7f"
                   tenant_id="f1e2d3c4-b5a6-4d5e-9f0a-1b2c3d4e5f6a"
                   variables="[]"
@@ -49,7 +85,7 @@
                   updated_at="2025-01-01 00:00:00"/>
 
     <!-- Certificate A for Template A (COMPLETED) - for multi-tenant test -->
-    <certificates id="b8c9d0e1-f2a3-4b2c-5d4e-7f8a9b0c1d2e"
+    <certificates id="d0e1f2a3-b4c5-4d6e-7f8a-9b0c1d2e3f4a"
                   template_id="c3d4e5f6-a7b8-4c7d-0e1f-2a3b4c5d6e7f"
                   tenant_id="f1e2d3c4-b5a6-4d5e-9f0a-1b2c3d4e5f6a"
                   variables="[]"

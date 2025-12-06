@@ -5,19 +5,22 @@ import com.kulturman.irembotest.domain.application.CertificateService;
 import com.kulturman.irembotest.domain.application.GenerateCertificateRequest;
 import com.kulturman.irembotest.domain.entities.Certificate;
 import com.kulturman.irembotest.domain.entities.CertificateStatus;
-import com.kulturman.irembotest.domain.entities.Template;
 import com.kulturman.irembotest.domain.entities.User;
+import com.kulturman.irembotest.fixtures.FixtureUtils;
 import com.kulturman.irembotest.infrastructure.persistence.CertificateDb;
-import com.kulturman.irembotest.infrastructure.persistence.TemplateDb;
 import com.kulturman.irembotest.infrastructure.persistence.UserDb;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseSetup;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
+import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -29,12 +32,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
+@TestExecutionListeners({
+    DependencyInjectionTestExecutionListener.class,
+    DirtiesContextTestExecutionListener.class,
+    TransactionalTestExecutionListener.class,
+    DbUnitTestExecutionListener.class
+})
+@DatabaseSetup({"/fixtures/users.xml", "/fixtures/certificate-test-data.xml"})
 public class CertificateGenerationE2ETest extends AbstractIntegrationTest {
-    @Autowired
-    private UserDb userRepository;
 
     @Autowired
-    private TemplateDb templateRepository;
+    private UserDb userRepository;
 
     @Autowired
     private CertificateDb certificateRepository;
@@ -42,43 +50,15 @@ public class CertificateGenerationE2ETest extends AbstractIntegrationTest {
     @Autowired
     private CertificateService certificateService;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private RabbitTemplate rabbitTemplate;
-
-    private Template template;
-
     @BeforeEach
     void setUp() {
-        UUID tenantId = UUID.randomUUID();
-        User user = User.builder()
-                .id(UUID.randomUUID())
-                .tenantId(tenantId)
-                .email("arnaud@example.com")
-                .password(passwordEncoder.encode("password"))
-                .name("Test User")
-                .build();
-
-        userRepository.save(user);
-
+        User user = userRepository.findById(FixtureUtils.USER_A_ID).orElseThrow();
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 user,
             null,
             null
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        template = Template.builder()
-                .id(UUID.randomUUID())
-                .tenantId(tenantId)
-                .name("Certificate of Achievement")
-                .content("<html><body>Certificate for {name} - Course: {course}</body></html>")
-                .variables("[\"name\", \"course\"]")
-                .build();
-
-        templateRepository.save(template);
     }
 
     @Test
@@ -88,7 +68,7 @@ public class CertificateGenerationE2ETest extends AbstractIntegrationTest {
         variables.put("course", "Spring Boot Development");
 
         GenerateCertificateRequest request = GenerateCertificateRequest.builder()
-                .templateId(template.getId())
+                .templateId(FixtureUtils.TEMPLATE_CERTIFICATE_GENERATION_ID)
                 .variables(variables)
                 .build();
 
