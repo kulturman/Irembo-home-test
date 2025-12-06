@@ -2,14 +2,17 @@ package com.kulturman.irembotest.api.controllers;
 
 import com.kulturman.irembotest.AbstractIntegrationTest;
 import com.kulturman.irembotest.domain.application.CertificateService;
-import com.kulturman.irembotest.domain.application.GenerateCertificateRequest;
+import com.kulturman.irembotest.api.dto.GenerateCertificateRequest;
 import com.kulturman.irembotest.domain.entities.Certificate;
 import com.kulturman.irembotest.domain.entities.CertificateStatus;
 import com.kulturman.irembotest.domain.entities.Template;
 import com.kulturman.irembotest.domain.entities.User;
+import com.kulturman.irembotest.fixtures.FixtureUtils;
 import com.kulturman.irembotest.infrastructure.persistence.CertificateDb;
 import com.kulturman.irembotest.infrastructure.persistence.TemplateDb;
 import com.kulturman.irembotest.infrastructure.persistence.UserDb;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseSetup;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +20,10 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
+import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -27,11 +33,20 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@TestExecutionListeners({
+    DependencyInjectionTestExecutionListener.class,
+    DirtiesContextTestExecutionListener.class,
+    TransactionalTestExecutionListener.class,
+    DbUnitTestExecutionListener.class
+})
+@DatabaseSetup({"/fixtures/users.xml", "/fixtures/certificate-test-data.xml"})
 public class PublicCertificateDownloadE2ETest extends AbstractIntegrationTest {
+
     @Autowired
     private UserDb userRepository;
 
@@ -44,44 +59,15 @@ public class PublicCertificateDownloadE2ETest extends AbstractIntegrationTest {
     @Autowired
     private CertificateService certificateService;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    private Template template;
-
     @BeforeEach
     void setUp() {
-        userRepository.deleteAll();
-        templateRepository.deleteAll();
-        certificateRepository.deleteAll();
-
-        UUID tenantId = UUID.randomUUID();
-        User user = User.builder()
-                .id(UUID.randomUUID())
-                .tenantId(tenantId)
-                .email("test@example.com")
-                .password(passwordEncoder.encode("password"))
-                .name("Test User")
-                .build();
-
-        userRepository.save(user);
-
+        User user = userRepository.findById(FixtureUtils.USER_A_ID).orElseThrow();
         Authentication authentication = new UsernamePasswordAuthenticationToken(
-                user,
+            user,
             null,
             null
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        template = Template.builder()
-                .id(UUID.randomUUID())
-                .tenantId(tenantId)
-                .name("Certificate of Completion")
-                .content("<html><body>Certificate for {studentName} - Course: {courseName}</body></html>")
-                .variables("[\"studentName\", \"courseName\"]")
-                .build();
-
-        templateRepository.save(template);
     }
 
     @Test
@@ -91,7 +77,7 @@ public class PublicCertificateDownloadE2ETest extends AbstractIntegrationTest {
         variables.put("courseName", "Java Programming");
 
         GenerateCertificateRequest request = GenerateCertificateRequest.builder()
-                .templateId(template.getId())
+                .templateId(FixtureUtils.TEMPLATE_PUBLIC_DOWNLOAD_ID)
                 .variables(variables)
                 .build();
 
@@ -115,14 +101,16 @@ public class PublicCertificateDownloadE2ETest extends AbstractIntegrationTest {
                         .isEqualTo(CertificateStatus.COMPLETED);
             });
 
-        mockMvc.perform(get("/api/public/certificates/download/{token}", downloadToken))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_PDF))
-                .andExpect(header().exists("Content-Disposition"))
-                .andExpect(header().string("Content-Disposition",
-                    org.hamcrest.Matchers.containsString("attachment")))
-                .andExpect(header().string("Content-Disposition",
-                    org.hamcrest.Matchers.containsString("certificate-" + certificateId + ".pdf")));
+        mockMvc.perform(
+            get("/api/public/certificates/download/{token}", downloadToken)
+        )
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_PDF))
+        .andExpect(header().exists("Content-Disposition"))
+        .andExpect(header().string("Content-Disposition",
+            containsString("attachment")))
+        .andExpect(header().string("Content-Disposition",
+            containsString("certificate-" + certificateId + ".pdf")));
     }
 
     @Test
@@ -140,7 +128,7 @@ public class PublicCertificateDownloadE2ETest extends AbstractIntegrationTest {
         variables.put("courseName", "Python Programming");
 
         GenerateCertificateRequest request = GenerateCertificateRequest.builder()
-                .templateId(template.getId())
+                .templateId(FixtureUtils.TEMPLATE_PUBLIC_DOWNLOAD_ID)
                 .variables(variables)
                 .build();
 
@@ -153,6 +141,7 @@ public class PublicCertificateDownloadE2ETest extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn410WhenCertificateGenerationFailed() throws Exception {
+        Template template = templateRepository.findById(FixtureUtils.TEMPLATE_PUBLIC_DOWNLOAD_ID).orElseThrow();
         UUID tenantId = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getTenantId();
 
         Certificate failedCertificate = Certificate.builder()
@@ -181,12 +170,12 @@ public class PublicCertificateDownloadE2ETest extends AbstractIntegrationTest {
         variables2.put("courseName", "Science");
 
         GenerateCertificateRequest request1 = GenerateCertificateRequest.builder()
-                .templateId(template.getId())
+                .templateId(FixtureUtils.TEMPLATE_PUBLIC_DOWNLOAD_ID)
                 .variables(variables1)
                 .build();
 
         GenerateCertificateRequest request2 = GenerateCertificateRequest.builder()
-                .templateId(template.getId())
+                .templateId(FixtureUtils.TEMPLATE_PUBLIC_DOWNLOAD_ID)
                 .variables(variables2)
                 .build();
 

@@ -1,7 +1,5 @@
 package com.kulturman.irembotest.infrastructure.configuration.security;
 
-import com.kulturman.irembotest.domain.entities.User;
-import com.kulturman.irembotest.domain.ports.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,7 +19,6 @@ import java.util.List;
 @AllArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
-    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(
@@ -39,27 +36,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
 
-        if (jwtService.validateToken(token)) {
-            String email = jwtService.extractEmail(token);
-            String role = jwtService.extractRole(token);
+        jwtService.parseAndValidate(token).ifPresent(claims -> {
+            if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                JwtPrincipal principal = JwtPrincipal.from(claims);
 
-            User user = userRepository.findByEmail(email).orElse(null);
-
-            if (user != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 List<SimpleGrantedAuthority> authorities = List.of(
-                    new SimpleGrantedAuthority("ROLE_" + role)
+                    new SimpleGrantedAuthority("ROLE_" + claims.role())
                 );
 
                 UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
-                            user,
+                            principal,
                             null,
                             authorities
                     );
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-        }
+        });
 
         filterChain.doFilter(request, response);
     }

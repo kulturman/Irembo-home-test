@@ -21,11 +21,14 @@ public class SecurityTenancyProvider implements TenancyProvider {
 
         Object principal = authentication.getPrincipal();
 
-        if (!(principal instanceof User)) {
-            throw new IllegalStateException("Principal is not a User instance. Cannot determine tenant context.");
+        if (principal instanceof JwtPrincipal jwtPrincipal) {
+            return jwtPrincipal.tenantId();
         }
 
-        User user = (User) principal;
-        return user.getTenantId();
+        if (principal instanceof User user) {
+            return user.getTenantId();
+        }
+
+        throw new IllegalStateException("Principal is not a recognized type. Cannot determine tenant context.");
     }
 }

@@ -91,7 +91,24 @@ class SecurityTenancyProviderTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenPrincipalIsNotUser() {
+    void shouldReturnTenantIdFromJwtPrincipal() {
+        JwtPrincipal jwtPrincipal = new JwtPrincipal(
+                UUID.randomUUID(),
+                "test@example.com",
+                testTenantId,
+                "USER"
+        );
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(jwtPrincipal, null, null);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        UUID tenantId = tenancyProvider.getCurrentTenantId();
+
+        assertEquals(testTenantId, tenantId);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenPrincipalIsNotRecognizedType() {
         String invalidPrincipal = "not-a-user-object";
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(invalidPrincipal, null, null);
@@ -102,6 +119,6 @@ class SecurityTenancyProviderTest {
                 () -> tenancyProvider.getCurrentTenantId()
         );
 
-        assertTrue(exception.getMessage().contains("Principal is not a User instance"));
+        assertTrue(exception.getMessage().contains("Principal is not a recognized type"));
     }
 }

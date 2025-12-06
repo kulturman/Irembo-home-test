@@ -1,9 +1,14 @@
 package com.kulturman.irembotest.domain.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kulturman.irembotest.api.dto.GenerateCertificateRequest;
 import com.kulturman.irembotest.domain.entities.Certificate;
 import com.kulturman.irembotest.domain.entities.Template;
 import com.kulturman.irembotest.domain.entities.CertificateStatus;
+import com.kulturman.irembotest.domain.exceptions.CertificateFileNotFoundException;
+import com.kulturman.irembotest.domain.exceptions.CertificateNotFoundException;
+import com.kulturman.irembotest.domain.exceptions.CertificateNotReadyException;
+import com.kulturman.irembotest.domain.exceptions.CertificateGenerationFailedException;
 import com.kulturman.irembotest.domain.exceptions.TemplateNotFoundException;
 import com.kulturman.irembotest.domain.ports.CertificateQueue;
 import com.kulturman.irembotest.domain.ports.FileStorage;
@@ -46,7 +51,7 @@ public class CertificateServiceTest {
         certificateRepository = new InMemoryCertificateRepository();
         objectMapper = new ObjectMapper();
         certificateService = new CertificateService(tenancyProvider, templateRepository, certificateRepository, certificateQueue, objectMapper, new TokenGenerator(), fileStorage);
-        when(tenancyProvider.getCurrentTenantId()).thenReturn(tenantId);
+        lenient().when(tenancyProvider.getCurrentTenantId()).thenReturn(tenantId);
     }
 
     @Test
@@ -74,7 +79,7 @@ public class CertificateServiceTest {
         assertEquals(CertificateStatus.QUEUED, certificate.getStatus());
         assertEquals(tenantId, certificate.getTenantId());
 
-        assertEquals("[{\"key\":\"name\",\"value\":\"Arnaud BAKYONO\"}]", certificate.getVariables());
+        assertEquals("{\"name\":\"Arnaud BAKYONO\"}", certificate.getVariables());
 
         assertEquals(1, certificateRepository.getSavedCertificates().size());
         Certificate savedCertificate = certificateRepository.getSavedCertificates().getFirst();
@@ -129,5 +134,54 @@ public class CertificateServiceTest {
             .build();
 
         assertThrows(TemplateNotFoundException.class, () -> certificateService.generateCertificate(request));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenCertificateNotFound() {
+        assertThrows(CertificateNotFoundException.class,
+            () -> certificateService.getCertificateForDownload("invalid-token"));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenCertificateGenerationFailed() {
+        var certificate = Certificate.builder()
+            .id(UUID.randomUUID())
+            .status(CertificateStatus.FAILED)
+            .downloadToken("failed-token")
+            .tenantId(tenantId)
+            .build();
+        certificateRepository.save(certificate);
+
+        assertThrows(CertificateGenerationFailedException.class,
+            () -> certificateService.getCertificateForDownload("failed-token"));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenCertificateNotReady() {
+        var certificate = Certificate.builder()
+            .id(UUID.randomUUID())
+            .status(CertificateStatus.QUEUED)
+            .downloadToken("queued-token")
+            .tenantId(tenantId)
+            .build();
+        certificateRepository.save(certificate);
+
+        assertThrows(CertificateNotReadyException.class,
+            () -> certificateService.getCertificateForDownload("queued-token"));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenFilePathIsNull() {
+        var certificate = Certificate.builder()
+            .id(UUID.randomUUID())
+            .status(CertificateStatus.COMPLETED)
+            .downloadToken("completed-token")
+            .filePath(null)
+            .tenantId(tenantId)
+            .build();
+        certificateRepository.save(certificate);
+
+        assertThrows(CertificateFileNotFoundException.class,
+            () -> certificateService.getCertificateForDownload("completed-token"));
     }
 }

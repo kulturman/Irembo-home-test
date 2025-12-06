@@ -73,7 +73,7 @@ public class CertificateGenerationJobTest {
                         .content("<h1>Hello guys, I am {name}, my dream company is {dreamCompany}</h1>")
                         .variables("[\"name\", \"dreamCompany\"]").build()
                 )
-                .variables("[{\"key\":\"name\",\"value\":\"Arnaud\"}, {\"key\":\"dreamCompany\",\"value\":\"Irembo\"}]")
+                .variables("{\"name\":\"Arnaud\",\"dreamCompany\":\"Irembo\"}")
                 .tenantId(tenantId)
                 .build()
         );
@@ -98,7 +98,7 @@ public class CertificateGenerationJobTest {
                         .content("<h1>Hello guys</h1>")
                         .variables("[\"name\", \"dreamCompany\"]").build()
                 )
-                .variables("[]")
+                .variables("{}")
                 .tenantId(tenantId)
                 .build()
         );
@@ -128,10 +128,10 @@ public class CertificateGenerationJobTest {
                         .tenantId(tenantId)
                         .name("Certificate Template")
                         .content("<h1>Test Certificate</h1>")
-                        .variables("[]")
+                        .variables("{}")
                         .build()
                 )
-                .variables("[]")
+                .variables("{}")
                 .tenantId(tenantId)
                 .build()
         );

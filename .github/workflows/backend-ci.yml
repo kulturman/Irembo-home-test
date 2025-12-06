@@ -4,7 +4,6 @@ permissions: write-all
 
 on:
   push:
-    branches: [ main, develop ]
     paths:
       - 'src/**'
       - 'pom.xml'

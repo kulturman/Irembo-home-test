@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dataset>
+    <!-- Admin User (Tenant A) -->
+    <users id="1a2b3c4d-5e6f-4a1b-2c3d-4e5f6a7b8c9d"
+           tenant_id="f1e2d3c4-b5a6-4d5e-9f0a-1b2c3d4e5f6a"
+           email="admin@test.com"
+           password="$2a$10$N9qo8uLOickgx2ZMRZoMye/JH/lNuqWWEP3I8LbPqZ3DU1eZ3bGQ2"
+           name="Admin User"
+           role="ADMIN"
+           created_at="2025-01-01 00:00:00"
+           updated_at="2025-01-01 00:00:00"/>
+
     <!-- Tenant A User -->
     <users id="a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d"
            tenant_id="f1e2d3c4-b5a6-4d5e-9f0a-1b2c3d4e5f6a"
@@ -16,6 +26,16 @@
            email="userB@example.com"
            password="$2a$10$N9qo8uLOickgx2ZMRZoMye/JH/lNuqWWEP3I8LbPqZ3DU1eZ3bGQ2"
            name="User B"
+           role="USER"
+           created_at="2025-01-01 00:00:00"
+           updated_at="2025-01-01 00:00:00"/>
+
+    <!-- Regular User (for UserControllerE2ETest) -->
+    <users id="2b3c4d5e-6f7a-4b2c-3d4e-5f6a7b8c9d0e"
+           tenant_id="a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d"
+           email="user@test.com"
+           password="$2a$10$N9qo8uLOickgx2ZMRZoMye/JH/lNuqWWEP3I8LbPqZ3DU1eZ3bGQ2"
+           name="Regular User"
            role="USER"
            created_at="2025-01-01 00:00:00"
            updated_at="2025-01-01 00:00:00"/>

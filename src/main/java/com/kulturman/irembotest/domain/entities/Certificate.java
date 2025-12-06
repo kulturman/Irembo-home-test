@@ -3,7 +3,6 @@ package com.kulturman.irembotest.domain.entities;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kulturman.irembotest.domain.application.Variable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +13,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Data
@@ -56,18 +55,18 @@ public class Certificate {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    public List<Variable> getVariablesAsList() throws JsonProcessingException {
+    public Map<String, String> getVariablesAsMap() throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(getVariables(), new TypeReference<List<Variable>>() {});
+        return mapper.readValue(getVariables(), new TypeReference<Map<String, String>>() {});
     }
 
     public String replaceVariables() {
         var templateContent = template.getContent();
         try {
-            var variables = getVariablesAsList();
+            var variablesMap = getVariablesAsMap();
 
-            for (Variable variable : variables) {
-                templateContent = templateContent.replace("{" + variable.getKey() + "}", variable.getValue());
+            for (Map.Entry<String, String> entry : variablesMap.entrySet()) {
+                templateContent = templateContent.replace("{" + entry.getKey() + "}", entry.getValue());
             }
 
         } catch (JsonProcessingException e) {

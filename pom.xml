@@ -249,6 +249,28 @@
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <version>0.8.13</version>
+        <configuration>
+          <excludes>
+            <!-- Main Application class -->
+            <exclude>com/kulturman/irembotest/IremboTestApplication.class</exclude>
+            <!-- DTOs (Lombok generated code) -->
+            <exclude>com/kulturman/irembotest/api/dto/*</exclude>
+            <!-- Entities (Lombok generated code) -->
+            <exclude>com/kulturman/irembotest/domain/entities/*</exclude>
+            <!-- Configuration classes -->
+            <exclude>com/kulturman/irembotest/infrastructure/configuration/*</exclude>
+            <!-- Spring Data JPA repositories (interfaces) -->
+            <exclude>com/kulturman/irembotest/infrastructure/persistence/*Db.class</exclude>
+            <!-- InMemory repositories (test doubles) -->
+            <exclude>com/kulturman/irembotest/infrastructure/persistence/InMemory*.class</exclude>
+            <!-- Domain exceptions (trivial classes) -->
+            <exclude>com/kulturman/irembotest/domain/exceptions/*</exclude>
+            <!-- Records (simple data holders) -->
+            <exclude>com/kulturman/irembotest/domain/application/CertificateDownload.class</exclude>
+            <exclude>com/kulturman/irembotest/infrastructure/configuration/security/JwtPrincipal.class</exclude>
+            <exclude>com/kulturman/irembotest/infrastructure/configuration/security/JwtService$JwtClaims.class</exclude>
+          </excludes>
+        </configuration>
         <executions>
           <execution>
             <goals>

@@ -9,12 +9,15 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class JwtService {
     private final SecretKey secretKey;
     private final long expirationTime;
+
+    public record JwtClaims(String email, UUID tenantId, String role, UUID userId) {}
 
     public JwtService(
             @Value("${jwt.secret}") String secret,
@@ -26,6 +29,7 @@ public class JwtService {
     public String generateToken(User user) {
         return Jwts.builder()
                 .subject(user.getEmail())
+                .claim("userId", user.getId().toString())
                 .claim("tenantId", user.getTenantId().toString())
                 .claim("role", user.getRole().name())
                 .issuedAt(new Date())
@@ -34,27 +38,42 @@ public class JwtService {
                 .compact();
     }
 
-    public boolean validateToken(String token) {
+    public Optional<JwtClaims> parseAndValidate(String token) {
         try {
-            Jwts.parser()
+            Claims claims = Jwts.parser()
                     .verifyWith(secretKey)
                     .build()
-                    .parseSignedClaims(token);
-            return true;
+                    .parseSignedClaims(token)
+                    .getPayload();
+
+            return Optional.of(new JwtClaims(
+                    claims.getSubject(),
+                    UUID.fromString(claims.get("tenantId", String.class)),
+                    claims.get("role", String.class),
+                    UUID.fromString(claims.get("userId", String.class))
+            ));
         } catch (Exception e) {
-            return false;
+            return Optional.empty();
         }
     }
 
+    // Deprecated - use parseAndValidate() instead for single-parse efficiency
+    public boolean validateToken(String token) {
+        return parseAndValidate(token).isPresent();
+    }
+
+    // Deprecated - use parseAndValidate() instead for single-parse efficiency
     public String extractEmail(String token) {
         return getClaims(token).getSubject();
     }
 
+    // Deprecated - use parseAndValidate() instead for single-parse efficiency
     public UUID extractTenantId(String token) {
         String tenantId = getClaims(token).get("tenantId", String.class);
         return UUID.fromString(tenantId);
     }
 
+    // Deprecated - use parseAndValidate() instead for single-parse efficiency
     public String extractRole(String token) {
         return getClaims(token).get("role", String.class);
     }

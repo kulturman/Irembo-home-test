@@ -2,6 +2,7 @@ package com.kulturman.irembotest.domain.application;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kulturman.irembotest.api.dto.GenerateCertificateRequest;
 import com.kulturman.irembotest.domain.entities.Certificate;
 import com.kulturman.irembotest.domain.entities.CertificateStatus;
 import com.kulturman.irembotest.domain.exceptions.CertificateFileNotFoundException;
@@ -21,9 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
@@ -91,15 +90,8 @@ public class CertificateService {
     }
 
     private String getVariablesJson(GenerateCertificateRequest request) {
-        List<Variable> variableList = request.getVariables().entrySet().stream()
-            .map(entry -> Variable.builder()
-                .key(entry.getKey())
-                .value(entry.getValue())
-                .build())
-            .collect(Collectors.toList());
-
         try {
-            return objectMapper.writeValueAsString(variableList);
+            return objectMapper.writeValueAsString(request.getVariables());
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to serialize variables", e);
         }
