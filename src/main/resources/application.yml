@@ -6,6 +6,9 @@ spring:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5420/irembo}
     username: ${DATABASE_USERNAME:irembo}
     password: ${DATABASE_PASSWORD:irembo}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
 
   jpa:
     hibernate:
