@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+    <!-- Tenant A User -->
+    <users id="a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d"
+           tenant_id="f1e2d3c4-b5a6-4d5e-9f0a-1b2c3d4e5f6a"
+           email="userA@example.com"
+           password="$2a$10$N9qo8uLOickgx2ZMRZoMye/JH/lNuqWWEP3I8LbPqZ3DU1eZ3bGQ2"
+           name="User A"
+           role="USER"
+           created_at="2025-01-01 00:00:00"
+           updated_at="2025-01-01 00:00:00"/>
+
+    <!-- Tenant B User -->
+    <users id="b2c3d4e5-f6a7-4b6c-9d0e-1f2a3b4c5d6e"
+           tenant_id="e2d3c4b5-a6f7-4e5d-0f9a-2b3c4d5e6f7a"
+           email="userB@example.com"
+           password="$2a$10$N9qo8uLOickgx2ZMRZoMye/JH/lNuqWWEP3I8LbPqZ3DU1eZ3bGQ2"
+           name="User B"
+           role="USER"
+           created_at="2025-01-01 00:00:00"
+           updated_at="2025-01-01 00:00:00"/>
+</dataset>
