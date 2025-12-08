@@ -1,5 +1,6 @@
 package com.kulturman.irembotest.infrastructure.storage;
 
+import com.kulturman.irembotest.domain.exceptions.FileStorageException;
 import com.kulturman.irembotest.domain.ports.FileStorage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -39,7 +40,7 @@ public class FileSystemStorage implements FileStorage {
         try {
             Files.createDirectories(Paths.get(baseDirectory));
         } catch (IOException e) {
-            throw new RuntimeException("Failed to create base directory: " + baseDirectory, e);
+            throw new FileStorageException("Failed to create base directory: " + baseDirectory, e);
         }
     }
 }
