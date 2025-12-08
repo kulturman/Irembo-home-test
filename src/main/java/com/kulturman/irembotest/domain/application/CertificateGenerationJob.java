@@ -5,10 +5,12 @@ import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.kulturman.irembotest.domain.entities.CertificateStatus;
+import com.kulturman.irembotest.domain.exceptions.CertificateGenerationFailedException;
+import com.kulturman.irembotest.domain.exceptions.CertificateNotFoundException;
+import com.kulturman.irembotest.domain.exceptions.QrCodeGenerationException;
 import com.kulturman.irembotest.domain.ports.CertificateRepository;
 import com.kulturman.irembotest.domain.ports.FileStorage;
 import com.kulturman.irembotest.domain.ports.PdfGenerator;
-import jakarta.transaction.Transactional;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -42,7 +44,7 @@ public class CertificateGenerationJob {
     }
 
     public void execute(UUID certificateId) {
-        var certificate = certificateRepository.findById(certificateId).orElseThrow(() -> new RuntimeException("Certificate not found"));
+        var certificate = certificateRepository.findById(certificateId).orElseThrow(() -> new CertificateNotFoundException("Certificate not found"));
 
         try {
             certificate.setStatus(CertificateStatus.PROCESSING);
@@ -59,7 +61,7 @@ public class CertificateGenerationJob {
         } catch (Exception e) {
             certificate.setStatus(CertificateStatus.FAILED);
             certificateRepository.save(certificate);
-            throw new RuntimeException("Failed to generate or store certificate", e);
+            throw new CertificateGenerationFailedException("Failed to generate or store certificate: " + e.getMessage());
         }
     }
 
@@ -80,7 +82,7 @@ public class CertificateGenerationJob {
                 document, lastPage, PDPageContentStream.AppendMode.APPEND, true)) {
 
                 float xPosition = lastPage.getMediaBox().getWidth() - 120;
-                float yPosition = 20; // 20px from bottom
+                float yPosition = 20;
 
                 contentStream.drawImage(pdImage, xPosition, yPosition, 100, 100);
             }
@@ -88,7 +90,7 @@ public class CertificateGenerationJob {
             document.save(outputStream);
             return outputStream.toByteArray();
         } catch (WriterException e) {
-            throw new RuntimeException("Failed to generate QR code", e);
+            throw new QrCodeGenerationException("Failed to generate QR code", e);
         }
     }
 

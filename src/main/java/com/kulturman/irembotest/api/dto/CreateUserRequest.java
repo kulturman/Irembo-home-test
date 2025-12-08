@@ -19,22 +19,18 @@ public class CreateUserRequest {
 
     @NotBlank(message = "Email is required")
     @Email(message = "Email must be valid")
-    @Schema(description = "User's email address (will be used as username for login)",
-            example = "john.doe@example.com")
+    @Schema(description = "User's email address (will be used as username for login)", example = "john.doe@example.com")
     private String email;
 
     @NotBlank(message = "Password is required")
-    @Schema(description = "User's password (will be hashed before storage)",
-            example = "SecurePassword123!")
+    @Schema(description = "User's password (will be hashed before storage)", example = "SecurePassword123!")
     private String password;
 
     @NotBlank(message = "Name is required")
-    @Schema(description = "User's full name for display purposes",
-            example = "John Doe")
+    @Schema(description = "User's full name for display purposes", example = "John Doe")
     private String name;
 
     @NotNull(message = "Role is required")
-    @Schema(description = "User's role determining their access level in the system",
-            example = "USER")
+    @Schema(description = "User's role determining their access level in the system", example = "USER")
     private UserRole role;
 }

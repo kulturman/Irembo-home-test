@@ -2,6 +2,7 @@ package com.kulturman.irembotest.domain.application;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kulturman.irembotest.api.dto.GenerateCertificateRequest;
 import com.kulturman.irembotest.domain.entities.Certificate;
 import com.kulturman.irembotest.domain.entities.CertificateStatus;
 import com.kulturman.irembotest.domain.exceptions.CertificateFileNotFoundException;
@@ -9,6 +10,7 @@ import com.kulturman.irembotest.domain.exceptions.CertificateGenerationFailedExc
 import com.kulturman.irembotest.domain.exceptions.CertificateNotFoundException;
 import com.kulturman.irembotest.domain.exceptions.CertificateNotReadyException;
 import com.kulturman.irembotest.domain.exceptions.TemplateNotFoundException;
+import com.kulturman.irembotest.domain.exceptions.VariableSerializationException;
 import com.kulturman.irembotest.domain.ports.CertificateQueue;
 import com.kulturman.irembotest.domain.ports.CertificateRepository;
 import com.kulturman.irembotest.domain.ports.FileStorage;
@@ -101,7 +103,7 @@ public class CertificateService {
         try {
             return objectMapper.writeValueAsString(variableList);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to serialize variables", e);
+            throw new VariableSerializationException("Failed to serialize variables", e);
         }
     }
 }

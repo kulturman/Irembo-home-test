@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kulturman.irembotest.domain.application.Variable;
+import com.kulturman.irembotest.domain.exceptions.VariableProcessingException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -71,7 +72,7 @@ public class Certificate {
             }
 
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new VariableProcessingException("Failed to process certificate variables", e);
         }
 
         return templateContent;

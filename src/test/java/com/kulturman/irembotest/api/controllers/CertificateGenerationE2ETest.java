@@ -1,8 +1,8 @@
 package com.kulturman.irembotest.api.controllers;
 
 import com.kulturman.irembotest.AbstractIntegrationTest;
+import com.kulturman.irembotest.api.dto.GenerateCertificateRequest;
 import com.kulturman.irembotest.domain.application.CertificateService;
-import com.kulturman.irembotest.domain.application.GenerateCertificateRequest;
 import com.kulturman.irembotest.domain.entities.Certificate;
 import com.kulturman.irembotest.domain.entities.CertificateStatus;
 import com.kulturman.irembotest.domain.entities.User;
