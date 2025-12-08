@@ -17,22 +17,19 @@ import java.util.UUID;
 public class TemplateResponse {
     @Schema(
         description = "Unique identifier of the template",
-        example = "123e4567-e89b-12d3-a456-426614174000",
-        required = true
+        example = "123e4567-e89b-12d3-a456-426614174000"
     )
     private UUID id;
 
     @Schema(
         description = "Name of the certificate template",
-        example = "Completion Certificate",
-        required = true
+        example = "Completion Certificate"
     )
     private String name;
 
     @Schema(
         description = "Template content with variable placeholders using {{variableName}} syntax",
-        example = "This is to certify that {{studentName}} has successfully completed {{courseName}} on {{completionDate}}.",
-        required = true
+        example = "This is to certify that {{studentName}} has successfully completed {{courseName}} on {{completionDate}}."
     )
     private String content;
 
@@ -45,15 +42,13 @@ public class TemplateResponse {
 
     @Schema(
         description = "Timestamp when the template was created",
-        example = "2024-12-04T10:30:00",
-        required = true
+        example = "2024-12-04T10:30:00"
     )
     private LocalDateTime createdAt;
 
     @Schema(
         description = "Timestamp when the template was last updated",
-        example = "2024-12-04T15:45:00",
-        required = true
+        example = "2024-12-04T15:45:00"
     )
     private LocalDateTime updatedAt;
 }

@@ -17,24 +17,19 @@ import java.util.UUID;
 @Schema(description = "User account information returned from the API (excludes sensitive data like password)")
 public class UserResponse {
 
-    @Schema(description = "Unique identifier of the user",
-            example = "123e4567-e89b-12d3-a456-426614174000")
+    @Schema(description = "Unique identifier of the user", example = "123e4567-e89b-12d3-a456-426614174000")
     private UUID id;
 
-    @Schema(description = "User's email address",
-            example = "john.doe@example.com")
+    @Schema(description = "User's email address", example = "john.doe@example.com")
     private String email;
 
-    @Schema(description = "User's full name",
-            example = "John Doe")
+    @Schema(description = "User's full name", example = "John Doe")
     private String name;
 
-    @Schema(description = "User's role in the system",
-            example = "USER")
+    @Schema(description = "User's role in the system", example = "USER")
     private UserRole role;
 
-    @Schema(description = "Tenant ID associated with this user",
-            example = "b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a11")
+    @Schema(description = "Tenant ID associated with this user", example = "b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a11")
     private UUID tenantId;
 
     @Schema(description = "Timestamp when the user account was created")

@@ -1,6 +1,8 @@
 package com.kulturman.irembotest.domain.application;
 
+import com.kulturman.irembotest.api.dto.CreateTemplateRequest;
 import com.kulturman.irembotest.api.dto.TemplateResponse;
+import com.kulturman.irembotest.api.dto.UpdateTemplateRequest;
 import com.kulturman.irembotest.domain.entities.Template;
 import com.kulturman.irembotest.domain.exceptions.TemplateNotFoundException;
 import com.kulturman.irembotest.domain.ports.TenancyProvider;

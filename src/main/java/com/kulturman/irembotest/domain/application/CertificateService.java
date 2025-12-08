@@ -2,6 +2,7 @@ package com.kulturman.irembotest.domain.application;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kulturman.irembotest.api.dto.GenerateCertificateRequest;
 import com.kulturman.irembotest.domain.entities.Certificate;
 import com.kulturman.irembotest.domain.entities.CertificateStatus;
 import com.kulturman.irembotest.domain.exceptions.CertificateFileNotFoundException;

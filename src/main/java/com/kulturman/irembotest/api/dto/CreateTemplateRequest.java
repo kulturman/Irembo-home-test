@@ -1,4 +1,4 @@
-package com.kulturman.irembotest.domain.application;
+package com.kulturman.irembotest.api.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -16,16 +16,14 @@ public class CreateTemplateRequest {
     @NotBlank(message = "Template name is required")
     @Schema(
         description = "Name of the certificate template",
-        example = "Completion Certificate",
-        required = true
+        example = "Completion Certificate"
     )
     private String name;
 
     @NotBlank(message = "Template content is required")
     @Schema(
         description = "Template content with variable placeholders using {{variableName}} syntax. Variables will be automatically extracted and stored.",
-        example = "This is to certify that {{studentName}} has successfully completed {{courseName}} on {{completionDate}}.",
-        required = true
+        example = "This is to certify that {{studentName}} has successfully completed {{courseName}} on {{completionDate}}."
     )
     private String content;
 }

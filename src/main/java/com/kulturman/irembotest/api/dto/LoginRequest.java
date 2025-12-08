@@ -17,7 +17,6 @@ public class LoginRequest {
     @Schema(
         description = "User's email address used as username",
         example = "user@example.com",
-        required = true,
         format = "email"
     )
     private String email;
@@ -26,7 +25,6 @@ public class LoginRequest {
     @Schema(
         description = "User's password for authentication",
         example = "SecurePassword123!",
-        required = true,
         format = "password"
     )
     private String password;

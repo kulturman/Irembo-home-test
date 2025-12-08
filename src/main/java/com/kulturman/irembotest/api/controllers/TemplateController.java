@@ -1,10 +1,10 @@
 package com.kulturman.irembotest.api.controllers;
 
+import com.kulturman.irembotest.api.dto.CreateTemplateRequest;
 import com.kulturman.irembotest.api.dto.ResourceId;
 import com.kulturman.irembotest.api.dto.TemplateResponse;
-import com.kulturman.irembotest.domain.application.CreateTemplateRequest;
+import com.kulturman.irembotest.api.dto.UpdateTemplateRequest;
 import com.kulturman.irembotest.domain.application.TemplateService;
-import com.kulturman.irembotest.domain.application.UpdateTemplateRequest;
 import com.kulturman.irembotest.domain.entities.Template;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

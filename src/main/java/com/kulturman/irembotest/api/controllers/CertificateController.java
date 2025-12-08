@@ -3,7 +3,7 @@ package com.kulturman.irembotest.api.controllers;
 import com.kulturman.irembotest.api.dto.CertificateResponse;
 import com.kulturman.irembotest.api.dto.ResourceId;
 import com.kulturman.irembotest.domain.application.CertificateService;
-import com.kulturman.irembotest.domain.application.GenerateCertificateRequest;
+import com.kulturman.irembotest.api.dto.GenerateCertificateRequest;
 import com.kulturman.irembotest.domain.entities.Certificate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
